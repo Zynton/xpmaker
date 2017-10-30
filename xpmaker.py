@@ -190,6 +190,7 @@ def length_to_time_signature(length):
 # XP to Vexflow
 def create_vexflow_xp(xp, bpm, fourfour=False):
 	length = 0
+	vexflow_notes = []
 	for event in xp:
 		length += parse_rhythm(event[1])
 		note = note_to_vexflow(event[0])
@@ -210,16 +211,19 @@ def create_vexflow_xp(xp, bpm, fourfour=False):
 		if 'd' in rhythm:
 			vex_str += '.addDotToAll()'
 
-		vex_str += ", "
+		vexflow_notes.append(vex_str)
 
-	vexflow_notes = vex_str[:-2]
-	# if not fourfour:
-	time_signature = length_to_time_signature(length)
-	# else:
-	# 	last_bar_length = length % 4
-	# 	last_bar_ts = length_to_time_signature(last_bar_length)
-	# 	time_signature = (4, 4, last_bar_ts[0], last_bar_ts[1])
+	if not fourfour:
+		time_signature = length_to_time_signature(length)
+	else:
+	 	last_bar_length = length % 4
+	 	last_bar_ts = length_to_time_signature(last_bar_length)
+	 	time_signature = (4, 4, last_bar_ts[0], last_bar_ts[1])
 	return vexflow_notes, time_signature
+
+# XP to abcjs
+def create_abcjs_xp(xp, bpm):
+	return "yop"
 
 
 ### FILE CREATION

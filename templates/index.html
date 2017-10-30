@@ -5,7 +5,7 @@
   		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   		<meta charset="UTF-8">
 
-  		<script src="https://unpkg.com/vexflow@1.2.84/releases/vexflow-min.js"></script>
+  		<script src="{{ url_for('bower.static', filename='vexflow/releases/vexflow-min.js') }}"></script>
   	</head>
   	<body>
 
@@ -52,8 +52,12 @@
 			// Connect it to the rendering context and draw!
 			stave.setContext(context).draw();
 
+			{% if ts[2] %}
+			{% set xp_last = xp [-1] %}
+			{% set xp = xp[:-1] %}
+			{% endif %}
 			var notes = [
-				{{xp | safe}}
+				{{ (',').join(xp) | safe }}
 			];
 
 			// Create a voice in 4/4 and add above notes
@@ -68,6 +72,34 @@
 
 			// Render voice
 			voice.draw(context, stave);
+
+			{% if ts[2] %}
+			// Create a stave at position 10, 40 of width 400 on the canvas.
+			var stave = new VF.Stave(10, 120, 1300);
+
+			// Add a clef and time signature.
+			stave.addClef("treble").addTimeSignature("{{ts[2]}}/{{ts[3]}}");
+
+			// Connect it to the rendering context and draw!
+			stave.setContext(context).draw();
+
+			var notes = [
+				{{ xp_last | safe }}
+			];
+
+			// Create a voice in 4/4 and add above notes
+			var voice = new VF.Voice({num_beats: {{ts[2]}},  beat_value: {{ts[3]}}});
+			// turn off tick counter
+		    voice.setStrict(false)
+		    // Add notes to voice
+			voice.addTickables(notes);
+
+			// Format and justify the notes to 400 pixels.
+			var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 1200);
+
+			// Render voice
+			voice.draw(context, stave);
+			{% endif %}
 	  	</script>
 	  	{% endif %}
     
