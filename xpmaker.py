@@ -185,20 +185,26 @@ def create_vexflow_xp(xp, bpm, vex_str="", length_sofar=0, bars=0):
 		vex_str += 'keys: ["' + note + '"], '
 		vex_str += 'duration: "' + rhythm + '" })'
 
-		if '#' in note:
+		if '##' in note:
+			vex_str += '.addAccidental(0, new VF.Accidental("##"))'
+		elif '#' in note:
 			vex_str += '.addAccidental(0, new VF.Accidental("#"))'
+		elif 'bb' in note:
+			vex_str += '.addAccidental(0, new VF.Accidental("bb"))'
+		elif 'b' in note:
+			vex_str += '.addAccidental(0, new VF.Accidental("b"))'
 		if 'd' in rhythm:
 			vex_str += '.addDotToAll()'
 
 		vex_str += ", "
 
+	### 4/4 loop
 		#if length_sofar >= 4.:
 		#	length_sofar -= 4.
 		#	vex_str += ', new Vex.Flow.BarNote(), '
 		#	bars += 1
 		#else:
 		#	vex_str += ', '
-	#print 'length_sofar:', length_sofar
 	#if length_sofar == 0.0:
 		#return vex_str[:-2], bars
 	num = length_sofar
