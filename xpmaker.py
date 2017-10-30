@@ -175,13 +175,13 @@ def note_to_vexflow(note_str):
 	return note
 
 # XP to Vexflow
-def create_vexflow_xp(xp, bpm, vex_str="", length_sofar=0, bars=0):
+def create_vexflow_xp(xp, bpm):
 	for event in xp:
-		length_sofar += parse_rhythm(event[1])
+		length = parse_rhythm(event[1])
 		note = note_to_vexflow(event[0])
 		rhythm = rhythm_to_vexflow(event[1])
 
-		vex_str += 'new VF.StaveNote({clef: "treble", '
+		vex_str = 'new VF.StaveNote({clef: "treble", '
 		vex_str += 'keys: ["' + note + '"], '
 		vex_str += 'duration: "' + rhythm + '" })'
 
@@ -198,20 +198,9 @@ def create_vexflow_xp(xp, bpm, vex_str="", length_sofar=0, bars=0):
 
 		vex_str += ", "
 
-	### 4/4 loop
-		#if length_sofar >= 4.:
-		#	length_sofar -= 4.
-		#	vex_str += ', new Vex.Flow.BarNote(), '
-		#	bars += 1
-		#else:
-		#	vex_str += ', '
-	#if length_sofar == 0.0:
-		#return vex_str[:-2], bars
-	num = length_sofar
+	num = length
 	den = 4
-	prints = "length_sofar: " + str(num)
-	decimals = length_sofar - int(length_sofar)
-	prints += "\n decimals: " + str(decimals)
+	decimals = length - int(length)
 	if decimals > 0.0:
 		multiplier = 2
 		while ((decimals * multiplier) - int(decimals * multiplier)) != 0.0:
@@ -219,11 +208,7 @@ def create_vexflow_xp(xp, bpm, vex_str="", length_sofar=0, bars=0):
 		num = num*multiplier
 		den = den*multiplier
 	ts = (int(num), int(den))
-	prints += "\n ts: " + str(ts)
-	print(prints)
-	return vex_str[:-2], ts, prints
-	#else:
-	#	return create_vexflow_xp(xp, bpm, vex_str, length_sofar, bars)
+	return vex_str[:-2], ts
 
 
 ### FILE CREATION

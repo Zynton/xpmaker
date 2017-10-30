@@ -30,8 +30,8 @@ def submit():
     rhythms = parse_input(rhythms_str)
 
     xp = xp_mix_and_match(notes, rhythms)
-    xp_vexflow, ts, prints = create_vexflow_xp(xp, bpm)
+    xp_vexflow, ts = create_vexflow_xp(xp, bpm)
 
     return render_template('index.html', xp=xp_vexflow, ts=ts)
 
-#app.run(host='0.0.0.0', port=5000)
+app.run(host='0.0.0.0', port=5000)
