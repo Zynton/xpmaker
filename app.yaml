@@ -1,0 +1,19 @@
+application: xp-maker
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+inbound_services:
+- warmup
+
+handlers:
+- url: /.*
+  script: manage.app
+  login: optional
+
+libraries:
+- name: webapp2
+  version: "2.5.2"
+- name: flask
+  version: latest

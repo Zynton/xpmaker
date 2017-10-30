@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+  		<title>XP Maker</title>
+  		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  		<meta charset="UTF-8">
+
+  		<script src="https://unpkg.com/vexflow@1.2.84/releases/vexflow-min.js"></script>
+  	</head>
+  	<body>
+
+  		<h1>XP Maker</h1>
+
+  		<form method="post" id="inputs">
+  			<div>Tempo</div>
+  			<input type="number" name="bpm"></input>
+
+  			<div>Notes</div>
+	  		<input type="string" name="notes"></input>
+
+	  		<div>Rhythm</div>
+	  		<input type="string" name="rhythms"></input>
+
+	  		<div></div>
+	  		<input type="submit" name="submit"></input>
+	  	</form>
+
+	  	<div id="xp"></div>
+
+	  	<div id="prints">{{prints | safe}}</div>
+
+	  	{% if xp %}
+	  	<script>
+	  		VF = Vex.Flow;
+
+			// Create an SVG renderer and attach it to the DIV element named "boo".
+			var div = document.getElementById("xp")
+			var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+
+			// Size our svg:
+			renderer.resize(1300, 500);
+
+			// And get a drawing context:
+			var context = renderer.getContext();
+
+			// Create a stave at position 10, 40 of width 400 on the canvas.
+			var stave = new VF.Stave(10, 40, 1300);
+
+			// Add a clef and time signature.
+			stave.addClef("treble").addTimeSignature("{{ts[0]}}/{{ts[1]}}");
+
+			// Connect it to the rendering context and draw!
+			stave.setContext(context).draw();
+
+			var notes = [
+				{{xp | safe}}
+			];
+
+			// Create a voice in 4/4 and add above notes
+			var voice = new VF.Voice({num_beats: {{ts[0]}},  beat_value: {{ts[1]}}});
+			// turn off tick counter
+		    voice.setStrict(false)
+		    // Add notes to voice
+			voice.addTickables(notes);
+
+			// Format and justify the notes to 400 pixels.
+			var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 1200);
+
+			// Render voice
+			voice.draw(context, stave);
+	  	</script>
+	  	{% endif %}
+    
+  	</body>
+</html>

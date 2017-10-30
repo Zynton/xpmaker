@@ -1,9 +1,12 @@
-import midi
+#import midi
 import math
 from sys import version_info
 import os.path
 import re
 
+
+def give_name():
+	return "Antoine"
 
 ### MIDI STANDARDS
 ### ==============
@@ -22,68 +25,33 @@ def pitch_to_midi(pitch_str='C0'):
 	return getattr(midi, pitch_str)
 
 def parse_rhythm(rhythm_str):
-	dotted = False
-	tuplet_type = None
-	rhythm_value = 0
-
 	tuplet_re = re.compile(r'.*:(\d+)$')
 	
-	# a dotted note can be inputted "4." -> check for that
+	# a dotted note can be inputted "4."
+	# this transforms it into 
 	if rhythm_str[-1] == '.':
-		dotted = True
 		rhythm_value = int(rhythm_str[:-1])
+		rhythm_float = rhythm_value * 2/3.
 	# a tuplet can be inputted "4:3" -> check for that
 	elif tuplet_re.match(rhythm_str):
-		tuplet_type = int(re.match(r'.*:?(\d+)$', rhythm_str).group(1))
-		print "tuplet_type:", tuplet_type
-		print "rhythm_str:", rhythm_str
-		print "len(str(tuplet_type)):", len(str(tuplet_type))
-		print "rhythm_str[:-(len(str(tuplet_type))+1)]:", rhythm_str[:-(len(str(tuplet_type))+1)]
-		rhythm_value = int(rhythm_str[:-(len(str(tuplet_type))+1)])
+		tuplet_value = int(re.match(r'.*:?(\d+)$', rhythm_str).group(1))
+		rhythm_value = float(rhythm_str[:-(len(str(tuplet_value))+1)])
+		# Assuming the piece is in a binary time signature,
+		# the full tuplet will have the length of the nearest lower
+		# power of 2 times the length of the rhythm value
+		rv_length_in_beats = parse_rhythm(str(rhythm_value))
+		total_length = rv_length_in_beats * int(pow(2, math.floor(math.log(tuplet_value, 2))))
+		rhythm_float = 4 / (total_length / tuplet_value)
 	else:
-		rhythm_value = int(rhythm_str)
+		rhythm_float = float(rhythm_str)
 	
-	rhythm = {'value': rhythm_value, 'dotted': dotted, 'tuplet_type': tuplet_type}
-	return rhythm
+	length_in_beats = 4 / rhythm_float
+	return length_in_beats
 
 # Get midi ticks values from rhythms
 def rhythm_to_ticks(rhythm_str='4', bpm=100, resolution=220):
-	# a quarter note (rhythm = 4) means ticks = qn/1
-	# that's qn/2^(log2(rhythm)-2)
-	# = qn/2^(2-2) = qn/2^0 = qn/1
-	# a rhythm 1 should give a denominator 1/4
-	# a rhythm 2 should give a denominator 1/2
-	# a rhythm 4 should give a denominator 1
-	# a rhythm 8 (8th note) should give a denominator 2
-	# a rhythm 16 (16th note) should give a denominator 4
-	# a rhythm 32 should give a denominator 8
-	def get_denominator(rhythm_int):
-		return math.pow(2, (math.log(rhythm_int, 2) - 2))
-
-	qn = resolution # a quarter note is the same tick value as the resolution
-	rhythm = parse_rhythm(rhythm_str)
-	# a dotted note can be inputted "4." -> check for that
-	if rhythm['dotted']:
-		denominator = get_denominator(rhythm['value'])
-		ticks = qn / denominator
-		ticks += qn / get_denominator(rhythm['value'] * 2)
-	# whole note -> 1/4
-	# quarter note -> 1
-	# 4 (x) quarter notes (1) (y) = 1 whole note (1/4) (z)
-	# -> y/x=z <=> 1/4 = 1/4
-	#
-	# 2 (x) half notes (1/2) (y) = 1 whole note (1/4) (z)
-	# -> y/x=z <=> 1/2/2 = 1/4
-	#
-	# Therefore: 3 (x) quarter note triplets (1) (y) = 1 half note (1/2) (z)
-	# -> y/x=z <=> y = xz <=> y = 3/2
-	# -> triplet_denominator = tuplet_type * get_denominator(rhythm/2)
-	elif rhythm['tuplet_type']:
-		denominator = rhythm['tuplet_type'] * get_denominator(rhythm['value'] / 2)
-		ticks = qn / denominator
-	else:
-		denominator = get_denominator(rhythm['value'])
-		ticks = qn/denominator
+	length_in_beats = parse_rhythm(rhythm_str)
+	ticks = resolution * length_in_beats
 	return int(ticks)
 
 # Format tempo for midi tempo event
@@ -117,12 +85,13 @@ def simp_input(question):
 	else:
 		return raw_input(question)
 
+# Console ask
 def ask_user(question, repeat=False):
 	question += ' '
 	if not repeat:
 		return simp_input(question)
 	else:
-		print question, "\n (leave blank if you're done) \n"
+		print(question + "\n (leave blank if you're done) \n")
 		item = None
 		items = []
 		i = 1
@@ -130,8 +99,12 @@ def ask_user(question, repeat=False):
 			item = simp_input("#" + str(i) + ": ")
 			if item is not '': items.append(item)
 			i += 1
-		print ""
+		print("")
 		return items
+
+# Parse webapp strings
+def parse_input(input_str):
+	return input_str.split()
 
 
 ### XP MAKING
@@ -153,6 +126,12 @@ def xp_mix_and_match(notes, rhythms):
 		if notes_i is 0 and rhythms_i is 0: break
 		xp.append(note)
 	return xp
+
+def get_xp_length(xp):
+	length = 0.
+	for event in xp:
+		length += parse_rhythm(event[1])
+	return length
 
 # Creates the midi pattern from the xp and the tempo
 # Returns the pattern
@@ -179,6 +158,72 @@ def create_midi_xp(xp, bpm):
 	track.append(eot)
 	return pattern
 
+def rhythm_to_vexflow(rhythm_str):
+	mapping = {'1': 'f',
+			   '2': 'h',
+			   '4': 'q'
+			   }
+	if rhythm_str in mapping:
+		note = mapping[rhythm_str]
+	else:
+		note = rhythm_str
+	note = note.replace('.', 'd')
+	return note
+
+def note_to_vexflow(note_str):
+	note = re.findall(r'\w#?', note_str)[0] + '/' + re.findall(r'\d', note_str)[0]
+	return note
+
+# XP to Vexflow
+def create_vexflow_xp(xp, bpm, vex_str="", length_sofar=0, bars=0):
+	for event in xp:
+		length_sofar += parse_rhythm(event[1])
+		note = note_to_vexflow(event[0])
+		rhythm = rhythm_to_vexflow(event[1])
+
+		vex_str += 'new VF.StaveNote({clef: "treble", '
+		vex_str += 'keys: ["' + note + '"], '
+		vex_str += 'duration: "' + rhythm + '" })'
+
+		if '#' in note:
+			vex_str += '.addAccidental(0, new VF.Accidental("#"))'
+		if 'd' in rhythm:
+			vex_str += '.addDotToAll()'
+
+		vex_str += ", "
+
+		#if length_sofar >= 4.:
+		#	length_sofar -= 4.
+		#	vex_str += ', new Vex.Flow.BarNote(), '
+		#	bars += 1
+		#else:
+		#	vex_str += ', '
+	#print 'length_sofar:', length_sofar
+	#if length_sofar == 0.0:
+		#return vex_str[:-2], bars
+	num = length_sofar
+	den = 4
+	prints = "length_sofar: " + str(num)
+	decimals = length_sofar - int(length_sofar)
+	prints += "\n decimals: " + str(decimals)
+	if decimals > 0.0:
+		multiplier = 2
+		while ((decimals * multiplier) - int(decimals * multiplier)) != 0.0:
+			multiplier = multiplier * 2
+		num = num*multiplier
+		den = den*multiplier
+	ts = (int(num), int(den))
+	prints += "\n ts: " + str(ts)
+	print(prints)
+	return vex_str[:-2], ts, prints
+	#else:
+	#	return create_vexflow_xp(xp, bpm, vex_str, length_sofar, bars)
+
+
+### FILE CREATION
+### =============
+
+
 # Check if filename exists before overwriting.
 # If it does, add "_1" at the end of it.
 # If that already is there, replace "_1" with "_2" etc.
@@ -204,7 +249,6 @@ def write_midifile(filename, pattern):
 	filename += ".mid"
 	filename = check_and_fix_filename(filename)
 	midi.write_midifile(filename, pattern)
-	print "File saved as", filename
 
 
 ### RUNNING THE PROGRAM
@@ -214,18 +258,14 @@ def write_midifile(filename, pattern):
 def run_creation(bpm, notes, rhythms):
 	# Convert notes to midi pitch values
 	notes = [pitch_to_midi(note) for note in notes]
-	print "notes:", notes, '\n'
 	# Convert rhythms to midi tick values
 	rhythms = [rhythm_to_ticks(bpm=bpm, rhythm_str=rhythm) for rhythm in rhythms]
-	print "rhythms:", rhythms, '\n'
 
 	# Make the xp notes loop
 	xp = xp_mix_and_match(notes, rhythms)
-	print 'xp:', xp
 
 	# Make midi out of xp notes values
 	pattern = create_midi_xp(xp, bpm)
-	print 'pattern:', pattern
 
 	return pattern
 
@@ -249,9 +289,10 @@ def run_user():
 
 
 ## Run program with test values
-def run_test(bpm, notes, rhythms, filename='xp'):
+def run_test(bpm, notes, rhythms, filename=None):
 	pattern = run_creation(bpm, notes, rhythms)
-	write_midifile(filename, pattern)
+	if filename:
+		write_midifile(filename, pattern)
 
 def run_tuplets_test():
 	bpm = 120
@@ -260,7 +301,7 @@ def run_tuplets_test():
 # EMPTY WHITE ROOM
 #run_test(120, ['F3', 'G#3', 'F3', 'C#4', 'E3', 'C3', 'G#3'], ['4', '8', '4.', '2', '8', '8'], 'empty_white_room')
 # TUPLETS
-run_test(120, ['C3'], ['4', '4', '4.', '8', 
-		'4:3', '4:3', '4:3', '4:3', '4:3', '4:3',
-		'2:5', '2:5', '2:5', '2:5', '2:5',
-		'8:6', '8:6', '8:6', '8:6', '8:6', '8:6'], tuplets)
+#run_test(120, ['C3'], ['4', '4', '4.', '8', 
+#		'4:3', '4:3', '4:3', '4:3', '4:3', '4:3',
+#		'2:5', '2:5', '2:5', '2:5', '2:5',
+#		'8:6', '8:6', '8:6', '8:6', '8:6', '8:6'], 'tuplets')
