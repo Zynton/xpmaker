@@ -188,7 +188,7 @@ def length_to_time_signature(length):
 	return ts
 
 # XP to Vexflow
-def create_vexflow_xp(xp, bpm):
+def create_vexflow_xp(xp, bpm, fourfour=False):
 	length = 0
 	for event in xp:
 		length += parse_rhythm(event[1])
@@ -213,8 +213,13 @@ def create_vexflow_xp(xp, bpm):
 		vex_str += ", "
 
 	vexflow_notes = vex_str[:-2]
+	# if not fourfour:
 	time_signature = length_to_time_signature(length)
-	return vexflow_notes, ts
+	# else:
+	# 	last_bar_length = length % 4
+	# 	last_bar_ts = length_to_time_signature(last_bar_length)
+	# 	time_signature = (4, 4, last_bar_ts[0], last_bar_ts[1])
+	return vexflow_notes, time_signature
 
 
 ### FILE CREATION
