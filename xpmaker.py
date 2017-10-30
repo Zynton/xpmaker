@@ -176,8 +176,9 @@ def note_to_vexflow(note_str):
 
 # XP to Vexflow
 def create_vexflow_xp(xp, bpm):
+	length = 0
 	for event in xp:
-		length = parse_rhythm(event[1])
+		length += parse_rhythm(event[1])
 		note = note_to_vexflow(event[0])
 		rhythm = rhythm_to_vexflow(event[1])
 
