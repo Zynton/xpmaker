@@ -174,6 +174,19 @@ def note_to_vexflow(note_str):
 	note = re.findall(r'\w#?', note_str)[0] + '/' + re.findall(r'\d', note_str)[0]
 	return note
 
+def length_to_time_signature(length):
+	num = length
+	den = 4
+	decimals = length - int(length)
+	if decimals > 0.0:
+		multiplier = 2
+		while ((decimals * multiplier) - int(decimals * multiplier)) != 0.0:
+			multiplier = multiplier * 2
+		num = num * multiplier
+		den = den * multiplier
+	ts = (int(num), int(den))
+	return ts
+
 # XP to Vexflow
 def create_vexflow_xp(xp, bpm):
 	length = 0
@@ -199,17 +212,9 @@ def create_vexflow_xp(xp, bpm):
 
 		vex_str += ", "
 
-	num = length
-	den = 4
-	decimals = length - int(length)
-	if decimals > 0.0:
-		multiplier = 2
-		while ((decimals * multiplier) - int(decimals * multiplier)) != 0.0:
-			multiplier = multiplier * 2
-		num = num*multiplier
-		den = den*multiplier
-	ts = (int(num), int(den))
-	return vex_str[:-2], ts
+	vexflow_notes = vex_str[:-2]
+	time_signature = length_to_time_signature(length)
+	return vexflow_notes, ts
 
 
 ### FILE CREATION
