@@ -12,6 +12,11 @@
 
   		<h1>XP Maker</h1>
 
+  		{% if xp %}
+  		<textarea name="xp" id="xp", cols="80", rows="5">{{xp}}</textarea>
+  		<div id="xp_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
+  		{% endif %}
+
   		<form method="post" id="inputs">
   			<div>Title</div>
   			<input type="string" name="title"></input>
@@ -20,14 +25,18 @@
 			<script type="text/javascript">
 				window.onload = function() {
 					notes_editor = new ABCJS.Editor("notes", { canvas_id: "notes_canvas", midi_id:"midi", warnings_id:"warnings" });
-					rhythm_editor = new ABCJS.Editor("rhythm", { canvas_id: "rhythm_canvas", midi_id:"midi", warnings_id:"warnings" });
+					rhythm_editor = new ABCJS.Editor("rhythms", { canvas_id: "rhythm_canvas", midi_id:"midi", warnings_id:"warnings" });
+					{% if xp %}
+					xp_editor = new ABCJS.Editor("xp", { canvas_id: "xp_canvas", midi_id:"midi", warnings_id:"warnings" });
+					{% endif %}
 				}
 			</script>
-		  	<textarea name="abc" id="notes" cols="80" rows="5">E F# G B E</textarea>
+		  	<textarea name="notes" id="notes" cols="80" rows="5">E ^F G B E</textarea>
+
 			<div id="notes_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
 
   			<div>Enter your rhythm here without regard for notes</div>
-	  		<textarea name="abc" id="rhythm" cols="80" rows="5">L: 1
+	  		<textarea name="rhythms" id="rhythms" cols="80" rows="5">L: 1
 C/4 C/4 C/8 C/16 C/16</textarea>
 			<div id="rhythm_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
 

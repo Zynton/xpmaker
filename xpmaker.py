@@ -174,6 +174,9 @@ def note_to_vexflow(note_str):
 	note = re.findall(r'\w#?', note_str)[0] + '/' + re.findall(r'\d', note_str)[0]
 	return note
 
+def note_rhythm_to_abcjs(note_str, rhythm_str):
+	return note_str + '/' + rhythm_str
+
 def length_to_time_signature(length):
 	num = length
 	den = 4
@@ -222,8 +225,17 @@ def create_vexflow_xp(xp, bpm, fourfour=False):
 	return vexflow_notes, time_signature
 
 # XP to abcjs
-def create_abcjs_xp(xp, bpm):
-	return "yop"
+def create_abcjs_xp(xp):
+	length = 0
+	abcjs_str = "L: 1\n"
+	for event in xp:
+		length += parse_rhythm(event[1])
+		note_rhythm = note_rhythm_to_abcjs(event[0], event[1])
+
+		abcjs_str += note_rhythm + " "
+
+	time_signature = length_to_time_signature(length)
+	return abcjs_str, time_signature
 
 
 ### FILE CREATION

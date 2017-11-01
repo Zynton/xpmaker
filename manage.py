@@ -9,6 +9,8 @@ from flask import (Flask,
                    make_response)
 from flask_bower import Bower
 
+import re
+
 from xpmaker import (parse_input,
                      create_vexflow_xp,
                      create_abcjs_xp,
@@ -35,8 +37,6 @@ def submit():
     xp = xp_mix_and_match(notes, rhythms)
     xp_vexflow, ts = create_vexflow_xp(xp, bpm, fourfour=True)
 
-    xp_abcjs = create_abcjs_xp(xp, bpm)
-
     return render_template('index.html', xp=xp_vexflow, ts=ts)
 
 @app.route('/abcjs')
@@ -45,6 +45,24 @@ def abcjs():
 
 @app.route('/abcjs', methods=['POST'])
 def submit_abcjs():
-    return render_template('abcjs.html')
+    notes_str = request.form['notes']
+    print("note_str: " + notes_str)
+    rhythms_str = request.form['rhythms']
+    print("rhythms_str: " + rhythms_str)
+
+    notes = parse_input(notes_str)
+    rhythms_str = re.sub("\D", " ", rhythms_str)
+    rhythms = rhythms_str.split()
+    rhythms = rhythms[1:]
+    print("notes:", notes)
+    print("rhythms:", rhythms)
+
+    xp = xp_mix_and_match(notes, rhythms)
+    print("xp:", xp)
+    xp_abcjs, ts = create_abcjs_xp(xp)
+    print("xp_abcjs:", xp_abcjs)
+    print("ts:", ts)
+
+    return render_template('abcjs.html', xp=xp_abcjs, ts=ts)
 
 app.run(host='0.0.0.0', port=5000)
