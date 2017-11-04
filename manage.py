@@ -6,7 +6,8 @@ from flask import (Flask,
                    request,
                    session,
                    url_for,
-                   make_response)
+                   make_response,
+                   send_from_directory)
 from flask_bower import Bower
 
 import re
@@ -45,24 +46,25 @@ def abcjs():
 
 @app.route('/abcjs', methods=['POST'])
 def submit_abcjs():
-    notes_str = request.form['notes']
-    print("note_str: " + notes_str)
-    rhythms_str = request.form['rhythms']
-    print("rhythms_str: " + rhythms_str)
+    title = request.form['title'] or 'XP'
 
+    bpm = request.form['bpm'] or 100
+
+    notes_str = request.form['notes']
     notes = parse_input(notes_str)
+
+    rhythms_str = request.form['rhythms']
     rhythms_str = re.sub("\D", " ", rhythms_str)
     rhythms = rhythms_str.split()
     rhythms = rhythms[1:]
-    print("notes:", notes)
-    print("rhythms:", rhythms)
 
     xp = xp_mix_and_match(notes, rhythms)
-    print("xp:", xp)
     xp_abcjs, ts = create_abcjs_xp(xp)
-    print("xp_abcjs:", xp_abcjs)
-    print("ts:", ts)
 
-    return render_template('abcjs.html', xp=xp_abcjs, ts=ts)
+    return render_template('abcjs.html', xp=xp_abcjs, ts=ts, title=title, bpm=bpm)
+
+@app.route('/soundfont/<path:path>')
+def send_js(path):
+    return send_from_directory('soundfont', path)
 
 app.run(host='0.0.0.0', port=5000)

@@ -227,7 +227,7 @@ def create_vexflow_xp(xp, bpm, fourfour=False):
 # XP to abcjs
 def create_abcjs_xp(xp):
 	length = 0
-	abcjs_str = "L: 1\n"
+	abcjs_str = ""
 	for event in xp:
 		length += parse_rhythm(event[1])
 		note_rhythm = note_rhythm_to_abcjs(event[0], event[1])
