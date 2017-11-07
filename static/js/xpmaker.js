@@ -7,9 +7,11 @@ function updateXP() {
 	var notes = notes_str.split(/[ ]+/);
 
 	var rhythms_str = $('#rhythms_input').val();
-	rhythms_str = rhythms_str.replace(/\D/g, ' ');
-	var rhythms = rhythms_str.split(/[ ]+/);
-	rhythms.splice(0, 2);
+	rhythms_str = rhythms_str.replace(/L:?[ ]+\d?[\n]+/, '');
+	rhythms_str = rhythms_str.replace(/[ ]+/g, '0');
+	rhythms_str = rhythms_str.replace(/\D/g, '');
+	var rhythms = rhythms_str.split(/0/);
+	console.log(rhythms);
 
 	var xp = xp_mix_and_match(notes, rhythms);
 	var xp_abcjs = create_abcjs_xp(xp) || "";
