@@ -34,17 +34,21 @@ M: {{ts[0]}}/{{ts[1]}}
   		<form method="post" id="inputs">
   			<h3>General info (optional)</h3>
   			<div>Title</div>
-  			<input type="string" name="title"></input>
+  			<input type="string" name="title" class="input" id="title_input"></input>
 
   			<div>Tempo</div>
-  			<input type="number" name="bpm"></input>
+  			<input type="number" name="bpm" class="input" id="bpm_input"></input>
 
   			<h3>Notes</h3>
 			<div>Enter your notes here without regard for rhythm.</div>
 			<script type="text/javascript">
 				window.onload = function() {
-					notes_editor = new ABCJS.Editor("notes", { canvas_id: "notes_canvas", midi_id:"notes_midi", warnings_id:"warnings" });
-					rhythm_editor = new ABCJS.Editor("rhythms", { canvas_id: "rhythm_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
+					notes_editor = new ABCJS.Editor("notes_input", { canvas_id: "notes_canvas", midi_id:"notes_midi", warnings_id:"warnings" });
+					rhythm_editor = new ABCJS.Editor("rhythms_input", { canvas_id: "rhythm_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
+
+					/* Update the XP on every user input */
+					$('.input').bind('input propertychange', updateXP());
+
 					{% if xp %}
 					xp_editor = new ABCJS.Editor("xp", { canvas_id: "xp_canvas",
 												 		 midi_id: "xp_midi",
@@ -61,13 +65,13 @@ M: {{ts[0]}}/{{ts[1]}}
 					{% endif %}
 				}
 			</script>
-		  	<textarea name="notes" id="notes" cols="80" rows="5">E ^F G B E</textarea>
+		  	<textarea name="notes" class="input" id="notes_input" cols="80" rows="5">E ^F G B E F</textarea>
 
 			<div id="notes_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
 
 			<h3>Rhythm</h3>
   			<div>Enter your rhythm here without regard for notes</div>
-	  		<textarea name="rhythms" id="rhythms" cols="80" rows="5">L: 1
+	  		<textarea name="rhythms" class="input" id="rhythms_input" cols="80" rows="5">L: 1
 C/4 C/4 C/8 C/16 C/16</textarea>
 			<div id="rhythm_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
 
