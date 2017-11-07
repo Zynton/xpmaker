@@ -1,4 +1,5 @@
 function updateXP() {
+	console.log("updateXP called");
 	var title = $('#title_input').val() || "XP";
 	var bpm = $('#bpm_input').val() || "100";
 
@@ -26,7 +27,7 @@ function mk_abcjs_text(title, bpm, xp_abcjs) {
 	abcjs_text += "\nL: 1";
 	abcjs_text += "\nQ: " + bpm;
 	//abcjs_text += "\nM: " + ts[0] + "/" + ts[1];
-	abcjs_text += "\n||:" + xp_abcjs + ":||";
+	abcjs_text += "\n||: " + xp_abcjs + ":||";
 
 	return abcjs_text;
 };
@@ -51,7 +52,6 @@ function xp_mix_and_match(notes, rhythms) {
 function create_abcjs_xp(xp) {
 	var length = 0;
 	var abcjs_str = "";
-	console.log(xp);
 	for (var i = 0; i < xp.length; i++) {
 		evt = xp[i];
 		length += parse_rhythm(evt[1]);
