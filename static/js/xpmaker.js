@@ -50,10 +50,12 @@ function updateXP() {
 	var rhythms = rhythms_str.split(/[\D]+/);
 
 	var xp = xp_mix_and_match(notes, rhythms);
-	var xp_abcjs = create_abcjs_xp(xp) || "";
+	var creation = create_abcjs_xp(xp);
+	var xp_abcjs = creation[0] || "";
+	var ts = creation[1] || [4,4];
 
 	// Update XP Input
-	abcjs_text = mk_abcjs_text(title, bpm, xp_abcjs);
+	abcjs_text = mk_abcjs_text(title, bpm, xp_abcjs, ts);
 	xp_input = $('#xp_input');
 	xp_input.val(abcjs_text);
 
@@ -75,11 +77,11 @@ function update_text_field(field_id, text) {
 	$('#' + field_id).val(text);
 };
 
-function mk_abcjs_text(title, bpm, xp_abcjs) {
+function mk_abcjs_text(title, bpm, xp_abcjs, ts) {
 	var abcjs_text = "T: " + title;
 	abcjs_text += "\nL: 1";
 	abcjs_text += "\nQ: " + bpm;
-	//abcjs_text += "\nM: " + ts[0] + "/" + ts[1];
+	abcjs_text += "\nM: " + ts[0] + "/" + ts[1];
 	abcjs_text += "\n||: " + xp_abcjs + ":||";
 
 	return abcjs_text;
@@ -113,8 +115,24 @@ function create_abcjs_xp(xp) {
 		abcjs_str += note_rhythm + " ";
 	};
 
-	//var time_signature = length_to_time_signature(length);
-	return abcjs_str;//, time_signature;
+	var time_signature = length_to_time_signature(length);
+	return [abcjs_str, time_signature];
+};
+
+function length_to_time_signature(length) {
+	var num = length;
+	var den = 4;
+	var decimals = length - parseInt(length);
+	if (decimals > 0.0) {
+		var multiplier = 2;
+		while(((decimals * multiplier) - parseInt(decimals * multiplier)) != 0.0) {
+			multiplier = multiplier * 2;
+		};
+		num = num * multiplier;
+		den = den * multiplier;
+	};
+	var ts = [parseInt(num), parseInt(den)];
+	return ts;
 };
 
 function parse_rhythm(rhythm_str) {
