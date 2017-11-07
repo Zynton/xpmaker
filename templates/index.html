@@ -16,49 +16,76 @@
   		<link rel="stylesheet" href="{{ url_for('static', filename='css/abcjs-midi.css') }}" media="all" type="text/css" />
   	</head>
   	<body>
+  		<main class="container">
+  			<h1>Weird loop Maker</h1>
 
-  		<h1>XP Maker</h1>
+	  		<div class="row">
+		  		<h3>Loop</h3>
 
-  		<h2>Your generated loop</h2>
-  		<textarea name="xp" id="xp_input", cols="80", rows="5"></textarea>
-  		<div id="xp_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
-  		<div id="xp_midi"></div>
-  		<div id="xp_midi_dl"></div>
-  		<hr>
+		  		<div class="input-field">
+			  		<textarea name="xp" id="xp_input", cols="80", rows="5"></textarea>
+			  	</div>
+		  		<div id="xp_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
+		  		<div id="xp_midi"></div>
+		  		<div id="xp_midi_dl"></div>
 
-  		<h2>Input</h2>
-  		<form method="post" id="inputs">
-  			<h3>General info (optional)</h3>
-  			<div>Title</div>
-  			<input type="string" name="title" class="input" id="title_input" oninput="updateXP()"></input>
+		  		<div class="divider"></div>
+		  	</div>
 
-  			<div>Tempo</div>
-  			<input type="number" name="bpm" class="input" id="bpm_input" oninput="updateXP()"></input>
+	  		<div class="row">
+	  			<h3>Matrix</h3>
 
-  			<h3>Notes</h3>
-			<div>Enter your notes here without regard for rhythm.</div>
-			<script type="text/javascript">
-				window.onload = function() {
-					updateFields('notes');
-					updateFields('rhythms');
-					updateXP();
-				};
-			</script>
-		  	<textarea name="notes" class="input" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">E ^F G B E</textarea>
-		  	<textarea name="notes_translated" id="notes_translated" style="display:none;"></textarea>
+	  			<div class="col m6 section">
+	  				<h5>Notes</h5>
+			  		<form method="post" id="inputs">
+						<div>Enter your notes here without regard for rhythm.</div>
+						<script type="text/javascript">
+							window.onload = function() {
+								updateFields('notes');
+								updateFields('rhythms');
+								updateXP();
+							};
+						</script>
+						<div class="input-field">
+						  	<textarea name="notes" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">E ^F G B E</textarea>
+						</div>
+						<!-- HIDDEN : -->
+					  	<textarea name="notes_translated" id="notes_translated" style="display:none;"></textarea>
 
-			<div id="notes_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
+						<div id="notes_canvas"></div>
+					</form>
+		  		</div>
 
-			<h3>Rhythm</h3>
-  			<div>Enter your rhythm here without regard for notes</div>
-	  		<textarea name="rhythms" class="input" id="rhythms_input" cols="80" rows="5" oninput="updateFields('rhythms')">4 4 8 16 16</textarea>
-			<textarea name="rhythms_translated" id="rhythms_translated" style="display:none;"></textarea>
-			<div id="rhythm_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
-	  	</form>
+		  		<div class="col m6 section">
+					<h5>Rhythm</h5>
+					<form method="post" id="inputs">
+			  			<div>Enter your rhythm here without regard for notes</div>
+			  			<div class="input-field">
+					  		<textarea name="rhythms" id="rhythms_input" cols="80" rows="5" oninput="updateFields('rhythms')">4 4 8 16 16</textarea>
+					  	</div>
+					  	<!-- HIDDEN -->
+						<textarea name="rhythms_translated" id="rhythms_translated" style="display:none;"></textarea>
+						<div class="img-responsive" id="rhythm_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
+				  	</form>
+				</div>
+	  		</div>
 
-	  	<div id="xp"></div>
+	  		<div class="row">
+		  		<form method="post" id="inputs">
+		  			<div class="row">
+			  			<div class="input-field col m6">
+				        	<input placeholder="Title" type="text" name="title" id="title_input" oninput="updateXP()">
+				        	<label for="title_input">Title</label>
+				        </div>
 
-	  	<div id="prints">{{prints | safe}}</div>
+			  			<div class="input-field col m6">
+			  				<input placeholder="Tempo" type="number" name="bpm" id="bpm_input" oninput="updateXP()">
+			  				<label for="bpm_input">Tempo</label>
+			  			</div>
+			  		</div>
+		  		</form>
+		  	</div>
+		 </main>
     
   	</body>
 </html>
