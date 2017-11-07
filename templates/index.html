@@ -39,20 +39,8 @@
 				window.onload = function() {
 					notes_editor = new ABCJS.Editor("notes_input", { canvas_id: "notes_canvas", midi_id:"notes_midi", warnings_id:"warnings" });
 					rhythm_editor = new ABCJS.Editor("rhythms_input", { canvas_id: "rhythm_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
-					updateXP();
 
-					xp_editor = new ABCJS.Editor("xp_input", { canvas_id: "xp_canvas",
-												 		 midi_id: "xp_midi",
-												 		 midi_download_id: "xp_midi_dl",
-												 		 midi_options: {
-												 		 	generateDownload:"true",
-												 		 	downloadLabel:"Download %T.mid"
-												 		 },
-												 		 warnings_id: "warnings",
-												 		 parser_params: {},
-												 		 generate_midi: true,
-												 		 generate_warnings: false
-											    });
+					updateXP();
 				};
 			</script>
 		  	<textarea name="notes" class="input" id="notes_input" cols="80" rows="5" oninput="updateXP()">E ^F G B E</textarea>
