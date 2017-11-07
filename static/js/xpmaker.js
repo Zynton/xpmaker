@@ -11,7 +11,7 @@ function updateFields(currentField) {
 function updateNotes() {
 	var input_n = $('#notes_input').val();
 	input_n = input_n.replace(/[-,;:\/\']+/g, ' '); // Replace separators with space
-	input_n = input_n.replace(/^\s+|\s+$/g, ''); // Remove trailing spaces
+	input_n = removeTrailingSpace(input_n); // Remove trailing spaces
 
 	var n_str = "L: 1\n"; // Make new string
 	n_str += input_n;
@@ -25,7 +25,7 @@ function updateNotes() {
 function updateRhythms() {
 	var input_r = $('#rhythms_input').val();
 	input_r = input_r.replace(/[-,;:\/\']+/g, ' '); // Replace separators with space
-	input_r = input_r.replace(/^\s+|\s+$/g, ''); // Remove trailing spaces
+	input_r = removeTrailingSpace(input_r); // Remove trailing spaces
 
 	var r_str = "L: 1\nK: perc stafflines=1\n"; // Make new string
 	r_str += input_r.replace(/^|\D+/g, ' B/').slice(1); // Add "B/" before each number
@@ -35,14 +35,20 @@ function updateRhythms() {
 	rhythm_editor = new ABCJS.Editor("rhythms_translated", { canvas_id: "rhythm_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
 };
 
+function removeTrailingSpace(str) {
+	return str.replace(/^\s+|\s+$/g, ''); // Remove trailing spaces
+};
+
 function updateXP() {
 	var title = $('#title_input').val() || "XP";
 	var bpm = $('#bpm_input').val() || "100";
 
 	var notes_str = $('#notes_input').val();
+	notes_str = removeTrailingSpace(notes_str);
 	var notes = notes_str.split(/[ ]+/);
 
 	var rhythms_str = $('#rhythms_input').val();
+	rhythms_str = removeTrailingSpace(rhythms_str);
 	//rhythms_str = rhythms_str.replace(/L:?[ ]+\d?[\n]+/, '');
 	//rhythms_str = rhythms_str.replace(/[ ]+/g, '0');
 	//rhythms_str = rhythms_str.replace(/\D/g, '');
