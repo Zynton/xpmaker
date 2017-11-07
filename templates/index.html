@@ -38,19 +38,20 @@
 			<script type="text/javascript">
 				window.onload = function() {
 					notes_editor = new ABCJS.Editor("notes_input", { canvas_id: "notes_canvas", midi_id:"notes_midi", warnings_id:"warnings" });
-					rhythm_editor = new ABCJS.Editor("rhythms_input", { canvas_id: "rhythm_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
 
+					updateFields('rhythms');
 					updateXP();
 				};
 			</script>
-		  	<textarea name="notes" class="input" id="notes_input" cols="80" rows="5" oninput="updateXP()">E ^F G B E</textarea>
+		  	<textarea name="notes" class="input" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">E ^F G B E</textarea>
+		  	<textarea name="notes_translated" id="notes_translated" style="display:none;"></textarea>
 
 			<div id="notes_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
 
 			<h3>Rhythm</h3>
   			<div>Enter your rhythm here without regard for notes</div>
-	  		<textarea name="rhythms" class="input" id="rhythms_input" cols="80" rows="5" oninput="updateXP()">L: 1
-C/4 C/4 C/8 C/16 C/16</textarea>
+	  		<textarea name="rhythms" class="input" id="rhythms_input" cols="80" rows="5" oninput="updateFields('rhythms')">4 4 8 16 16</textarea>
+			<textarea name="rhythms_translated" id="rhythms_translated" style="display:none;"></textarea>
 			<div id="rhythm_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
 	  	</form>
 
