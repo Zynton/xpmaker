@@ -9,20 +9,28 @@ function updateFields(currentField) {
 };
 
 function updateNotes() {
-	
+	var input_n = $('#notes_input').val();
+	input_n = input_n.replace(/[-,;:\/\']+/g, ' '); // Replace separators with space
+	input_n = input_n.replace(/^\s+|\s+$/g, ''); // Remove trailing spaces
+
+	var n_str = "L: 1\n"; // Make new string
+	n_str += input_n;
+	//n_str += input_n.replace(/^|\W^[#]+/g, ' ^').slice(1);
+
+	$('#notes_translated').val(n_str); // Put new string in a hidden textarea
+	// Update the svg score
+	notes_editor = new ABCJS.Editor("notes_translated", { canvas_id: "notes_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
 };
 
 function updateRhythms() {
-	console.log('updateRhythms()');
 	var input_r = $('#rhythms_input').val();
 	input_r = input_r.replace(/[-,;:\/\']+/g, ' '); // Replace separators with space
 	input_r = input_r.replace(/^\s+|\s+$/g, ''); // Remove trailing spaces
 
 	var r_str = "L: 1\nK: perc stafflines=1\n"; // Make new string
-	r_str += input_r.replace(/^|\D+/g, ' B/').slice(1);
+	r_str += input_r.replace(/^|\D+/g, ' B/').slice(1); // Add "B/" before each number
 
 	$('#rhythms_translated').val(r_str); // Put new string in a hidden textarea
-	console.log($('#rhythms_translated').val());
 	// Update the svg score
 	rhythm_editor = new ABCJS.Editor("rhythms_translated", { canvas_id: "rhythm_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
 };

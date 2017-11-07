@@ -37,8 +37,7 @@
 			<div>Enter your notes here without regard for rhythm.</div>
 			<script type="text/javascript">
 				window.onload = function() {
-					notes_editor = new ABCJS.Editor("notes_input", { canvas_id: "notes_canvas", midi_id:"notes_midi", warnings_id:"warnings" });
-
+					updateFields('notes');
 					updateFields('rhythms');
 					updateXP();
 				};
