@@ -28,24 +28,6 @@ def index():
 
 @app.route('/', methods=['POST'])
 def submit():
-    notes_str = request.form['notes']
-    rhythms_str = request.form['rhythms']
-    
-    bpm = request.form['bpm']
-    notes = parse_input(notes_str)
-    rhythms = parse_input(rhythms_str)
-
-    xp = xp_mix_and_match(notes, rhythms)
-    xp_vexflow, ts = create_vexflow_xp(xp, bpm, fourfour=True)
-
-    return render_template('index.html', xp=xp_vexflow, ts=ts)
-
-@app.route('/abcjs')
-def abcjs():
-    return render_template('abcjs.html')
-
-@app.route('/abcjs', methods=['POST'])
-def submit_abcjs():
     title = request.form['title'] or 'XP'
 
     bpm = request.form['bpm'] or 100
