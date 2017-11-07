@@ -17,18 +17,12 @@
 
   		<h1>XP Maker</h1>
 
-  		{% if xp %}
   		<h2>Your generated loop</h2>
-  		<textarea name="xp" id="xp", cols="80", rows="5">T: {{title}}
-L: 1
-Q: {{bpm}}
-M: {{ts[0]}}/{{ts[1]}}
-||: {{xp}}:||</textarea>
+  		<textarea name="xp" id="xp_input", cols="80", rows="5"></textarea>
   		<div id="xp_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
   		<div id="xp_midi"></div>
   		<div id="xp_midi_dl"></div>
   		<hr>
-  		{% endif %}
 
   		<h2>Input</h2>
   		<form method="post" id="inputs">
@@ -49,8 +43,7 @@ M: {{ts[0]}}/{{ts[1]}}
 					/* Update the XP on every user input */
 					$('.input').bind('input propertychange', updateXP());
 
-					{% if xp %}
-					xp_editor = new ABCJS.Editor("xp", { canvas_id: "xp_canvas",
+					xp_editor = new ABCJS.Editor("xp_input", { canvas_id: "xp_canvas",
 												 		 midi_id: "xp_midi",
 												 		 midi_download_id: "xp_midi_dl",
 												 		 midi_options: {
@@ -62,8 +55,7 @@ M: {{ts[0]}}/{{ts[1]}}
 												 		 generate_midi: true,
 												 		 generate_warnings: false
 											    });
-					{% endif %}
-				}
+				};
 			</script>
 		  	<textarea name="notes" class="input" id="notes_input" cols="80" rows="5">E ^F G B E F</textarea>
 
