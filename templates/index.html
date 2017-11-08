@@ -24,12 +24,13 @@
   				<li>
   					<div class="collapsible-header active"><i class="material-icons">hearing</i>Resulting Loop</div>
 				    <div class="collapsible-body center-align">
-				    	<div class="input-field">
-					  		<textarea name="xp" id="xp_input"></textarea>
-					  	</div>
 				  		<div id="xp_canvas" class="center-align" style="width: 100%; overflow: hidden; height: 400px;"></div>
 				  		<div id="xp_midi"></div>
 				  		<div id="xp_midi_dl"></div>
+				  		<a href="#" onclick="toggle_xp_input_display()"><i class="material-icons">edit</i></a>
+				  		<div class="input-field">
+					  		<textarea name="xp" id="xp_input" style="display:none"></textarea>
+					  	</div>
 				    </div>
   				</li>
   				<li>
@@ -56,6 +57,12 @@
 									updateFields('notes');
 									updateFields('rhythms');
 									updateXP();
+								};
+
+								function toggle_xp_input_display() {
+									var xp_input = $('#xp_input');
+									xp_input.toggle();
+									xp_input.focus();
 								};
 
 								/*window.onresize = function(event) {
