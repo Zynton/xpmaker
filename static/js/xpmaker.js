@@ -1,13 +1,13 @@
 function get_canvas_dim(canvas_id, sw) {
 	var w = $('.container').width();
 	var e = $('#' + canvas_id).width();
-	console.log("w = " + w);
-	console.log("e = " + e);
+	//console.log("w = " + w);
+	//console.log("e = " + e);
 	var sw = sw;
 	var scale = 1.0;
 	
 	var arealeft = w - e;
-	console.log("arealeft = " + arealeft);
+	//console.log("arealeft = " + arealeft);
 	if (arealeft < (sw + (sw/3))) {
 		scale = scale * (arealeft - 50)/ sw;
 		sw = arealeft - 50;			

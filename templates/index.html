@@ -16,16 +16,32 @@
   		<link rel="stylesheet" href="{{ url_for('static', filename='css/abcjs-midi.css') }}" media="all" type="text/css" />
   	</head>
   	<body>
+  		<header><h1 class="center-align">Weird loop Maker</h1></header>
   		<main class="container">
-  			<h1>Weird loop Maker</h1>
+
+  			<div class="row">
+		  		<form method="post" id="inputs">
+		  			<div class="row">
+			  			<div class="input-field col m6">
+				        	<input placeholder="Title" type="text" name="title" id="title_input" oninput="updateXP()">
+				        	<label for="title_input">Title</label>
+				        </div>
+
+			  			<div class="input-field col m6">
+			  				<input placeholder="Tempo" type="number" name="bpm" id="bpm_input" oninput="updateXP()">
+			  				<label for="bpm_input">Tempo</label>
+			  			</div>
+			  		</div>
+		  		</form>
+		  	</div>
 
 	  		<div class="row">
 		  		<h3>Loop</h3>
 
 		  		<div class="input-field">
-			  		<textarea name="xp" id="xp_input", cols="80", rows="5"></textarea>
+			  		<textarea name="xp" id="xp_input"></textarea>
 			  	</div>
-		  		<div id="xp_canvas" class="center" style="width: 200px; overflow: hidden; height: 420.348px;"></div>
+		  		<div id="xp_canvas" class="center-align" style="width: 200px; overflow: hidden; height: 420.348px;"></div>
 		  		<div id="xp_midi"></div>
 		  		<div id="xp_midi_dl"></div>
 
@@ -78,23 +94,8 @@
 				  	</form>
 				</div>
 	  		</div>
-
-	  		<div class="row">
-		  		<form method="post" id="inputs">
-		  			<div class="row">
-			  			<div class="input-field col m6">
-				        	<input placeholder="Title" type="text" name="title" id="title_input" oninput="updateXP()">
-				        	<label for="title_input">Title</label>
-				        </div>
-
-			  			<div class="input-field col m6">
-			  				<input placeholder="Tempo" type="number" name="bpm" id="bpm_input" oninput="updateXP()">
-			  				<label for="bpm_input">Tempo</label>
-			  			</div>
-			  		</div>
-		  		</form>
-		  	</div>
 		 </main>
+		 <footer></footer>
     
   	</body>
 </html>
