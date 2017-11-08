@@ -146,12 +146,16 @@ function length_to_time_signature(length) {
 };
 
 function divide_ts(ts) {
-	if (ts[0] % ts[1] != 0 || ts[0] == ts[1]) {
+	var feel = 4
+	if (ts[0] % 4 != 0 || ts[0] % 3 != 0 || ts[0] == ts[1]) {
 		return ts;
-	} else {
-		var num = ts[0] / (ts[0] / ts[1]);
-		var new_ts = [num, ts[1]];
+	} else if (ts[0] % 3 == 0) {
+		feel = 3;
+	} else if (ts[0] % 4 == 0) {
+		feel = 3;
 	};
+	var num = ts[0] / (ts[0] / feel);
+	var new_ts = [num, ts[1]];
 	return new_ts;
 };
 
