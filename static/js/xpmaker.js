@@ -38,6 +38,8 @@ function updateRhythms() {
 		length += parse_rhythm(r);
 	};
 	var ts = length_to_time_signature(length)
+	ts = divide_ts(ts);
+	r_str = make_bars_fit(ts, r_str);
 
 	r_str = "L: 1\nK: perc stafflines=1\nM:" + ts[0] + '/' + ts[1] + '\n' + r_str;
 
@@ -218,6 +220,10 @@ function rhythm_from_abcjs(abcjs_str) {
 
 function parse_rhythm(rhythm_str) {
 	tuplet_re = /.*:(\d+)$/;
+
+	if (rhythm_str == '3') rhythm_str = '4.';
+	if (rhythm_str == '6' || rhythm_str == '7') rhythm_str = '8.';
+	if (rhythm_str == '11') rhythm_str = '16.';
 	
 	if (rhythm_str[rhythm_str.length - 1] == '.') {
 		var rhythm_value = parseInt(rhythm_str);
