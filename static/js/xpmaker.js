@@ -132,19 +132,33 @@ function create_abcjs_xp(xp) {
 	var time_signature = length_to_time_signature(length);
 	time_signature = divide_ts(time_signature);
 
-	console.log(abcjs_str_to_full_matrix(abcjs_str, time_signature));
+	var matrix = abcjs_str_to_full_matrix(abcjs_str, time_signature); // MUST always come before adjust_beams (depends on the spaces)
+	abcjs_str = auto_line_break(abcjs_str, matrix);
+
 	abcjs_str = make_bars_fit(time_signature, abcjs_str);
 	abcjs_str = adjust_beams(abcjs_str);
-	//abcjs_str = auto_line_break(abcjs_str, time_signature);
 
 	return [abcjs_str, time_signature];
 };
 
-function auto_line_break(abcjs_str, ts) {
-	var matrix = abcjs_str_to_matrix(abcjs_str);
-	for (var i=0; i < matrix.length; i++) {
-		get_nr(option, abcjs_str, index, ts)
-	}
+function auto_line_break(abcjs_str, matrix) {
+	var indexes = get_each_nth_bars(4, matrix);
+	for (var i = 0; i < indexes.length; i++) {
+		var position = getPosition(abcjs_str, ' ', indexes[i]);
+		abcjs_str = abcjs_str.substr(0, position) + '\n' + abcjs_str.substr(position + 1, abcjs_str.length);
+	};
+	return abcjs_str;
+};
+
+function get_each_nth_bars(n, matrix) {
+	var indexes = [];
+	var n = 4;
+	for (var i = 0; i < matrix[0].length; i++) {
+		if (matrix[3][i] % n == 0 && matrix[4][i] == 1) {
+			indexes.push(i);
+		};
+	};
+	return indexes;
 };
 
 function length_to_time_signature(length) {
@@ -181,7 +195,7 @@ function make_bars_fit(ts, abcjs_str) {
 	var rhythms = rhythm_from_abcjs(abcjs_str); // make list of rhythms out of the string
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
-		current_bar +=  rhythm_to_length(parseInt(rhythms[i], ts[1])); // convert rhythm to make sense with ts den
+		current_bar +=  rhythm_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
 		if (current_bar >= ts[0]) {
 			var j = getPosition(abcjs_str, ' ', i+1); // find the position of the note in the string
 			abcjs_str = abcjs_str.substring(0, j) + '|' + abcjs_str.substring(j, abcjs_str.length); // add bar line
