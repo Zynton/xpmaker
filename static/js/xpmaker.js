@@ -29,7 +29,17 @@ function updateRhythms() {
 
 	var r_str = input_r.replace(/^|\D+/g, ' B/').slice(1); // Add "B/" before each number
 	r_str = adjust_beams(r_str);
-	r_str = "L: 1\nK: perc stafflines=1\n" + r_str;
+
+	// Get time signature
+	var length = 0;
+	var input_l = input_r.split(' ');
+	for (var i = 0; i < input_l.length; i++) {
+		r = input_l[i];
+		length += parse_rhythm(r);
+	};
+	var ts = length_to_time_signature(length)
+
+	r_str = "L: 1\nK: perc stafflines=1\nM:" + ts[0] + '/' + ts[1] + '\n' + r_str;
 
 	$('#rhythms_translated').val(r_str); // Put new string in a hidden textarea
 	// Update the svg score
