@@ -147,12 +147,12 @@ function length_to_time_signature(length) {
 
 function divide_ts(ts) {
 	var feel = 4
-	if (ts[0] % 4 != 0 || ts[0] % 3 != 0 || ts[0] == ts[1]) {
+	if (ts[0] % 4 != 0 && ts[0] % 3 != 0 || ts[0] == ts[1]) {
 		return ts;
 	} else if (ts[0] % 3 == 0) {
 		feel = 3;
 	} else if (ts[0] % 4 == 0) {
-		feel = 3;
+		feel = 4;
 	};
 	var num = ts[0] / (ts[0] / feel);
 	var new_ts = [num, ts[1]];
