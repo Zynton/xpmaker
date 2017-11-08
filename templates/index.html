@@ -14,15 +14,28 @@
   		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   		<link rel="stylesheet" href="{{ url_for('bower.static', filename='materialize/dist/css/materialize.min.css') }}" media="all" type="text/css" />
   		<link rel="stylesheet" href="{{ url_for('static', filename='css/abcjs-midi.css') }}" media="all" type="text/css" />
+  		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   	</head>
   	<body>
   		<header><h1 class="center-align">Weird loop Maker</h1></header>
   		<main class="container">
 
-  			<div class="row">
-		  		<form method="post" id="inputs">
-		  			<div class="row">
-			  			<div class="input-field col m6">
+  			<ul class="collapsible" data-collapsible="expandable">
+  				<li>
+  					<div class="collapsible-header active"><i class="material-icons">hearing</i>Resulting Loop</div>
+				    <div class="collapsible-body center-align">
+				    	<div class="input-field">
+					  		<textarea name="xp" id="xp_input"></textarea>
+					  	</div>
+				  		<div id="xp_canvas" class="center-align" style="width: 100%; overflow: hidden; height: 400px;"></div>
+				  		<div id="xp_midi"></div>
+				  		<div id="xp_midi_dl"></div>
+				    </div>
+  				</li>
+  				<li>
+  					<div class="collapsible-header"><i class="material-icons">info</i>Info</div>
+  					<div class="collapsible-body">
+  						<div class="input-field col m6">
 				        	<input placeholder="Title" type="text" name="title" id="title_input" oninput="updateXP()">
 				        	<label for="title_input">Title</label>
 				        </div>
@@ -31,71 +44,56 @@
 			  				<input placeholder="Tempo" type="number" name="bpm" id="bpm_input" oninput="updateXP()">
 			  				<label for="bpm_input">Tempo</label>
 			  			</div>
-			  		</div>
-		  		</form>
-		  	</div>
+  					</div>
+  				</li>
+  				<li>
+  					<div class="collapsible-header"><i class="material-icons">music_note</i>Notes</div>
+  					<div class="collapsible-body">
+  						<form method="post" id="inputs">
+							<div>Enter your notes here without regard for rhythm.</div>
+							<script type="text/javascript">
+								window.onload = function() {
+									updateFields('notes');
+									updateFields('rhythms');
+									updateXP();
+								};
 
-	  		<div class="row">
-		  		<h3>Loop</h3>
+								/*window.onresize = function(event) {
+									do_resize();
+								};
 
-		  		<div class="input-field">
-			  		<textarea name="xp" id="xp_input"></textarea>
-			  	</div>
-		  		<div id="xp_canvas" class="center-align" style="width: 200px; overflow: hidden; height: 420.348px;"></div>
-		  		<div id="xp_midi"></div>
-		  		<div id="xp_midi_dl"></div>
+								window.onload = function() {
+									do_resize();
+								}*/
 
-		  		<div class="divider"></div>
-		  	</div>
+							</script>
+							<div class="input-field">
+							  	<textarea name="notes" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">F _A E ^G ^A ^G z</textarea>
+							</div>
+							<!-- HIDDEN : -->
+						  	<textarea name="notes_translated" id="notes_translated" style="display:none;"></textarea>
 
-	  		<div class="row">
-	  			<h3>Matrix</h3>
-
-	  			<div class="col m6 section">
-	  				<h5>Notes</h5>
-			  		<form method="post" id="inputs">
-						<div>Enter your notes here without regard for rhythm.</div>
-						<script type="text/javascript">
-							window.onload = function() {
-								updateFields('notes');
-								updateFields('rhythms');
-								updateXP();
-							};
-
-							/*window.onresize = function(event) {
-								do_resize();
-							};
-
-							window.onload = function() {
-								do_resize();
-							}*/
-
-						</script>
-						<div class="input-field">
-						  	<textarea name="notes" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">F A c</textarea>
-						</div>
-						<!-- HIDDEN : -->
-					  	<textarea name="notes_translated" id="notes_translated" style="display:none;"></textarea>
-
-						<div id="notes_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
-					</form>
-		  		</div>
-
-		  		<div class="col m6 section">
-					<h5>Rhythm</h5>
-					<form method="post" id="inputs">
-			  			<div>Enter your rhythm here without regard for notes</div>
-			  			<div class="input-field">
-					  		<textarea name="rhythms" id="rhythms_input" cols="80" rows="5" oninput="updateFields('rhythms')">4 8 8 4</textarea>
-					  	</div>
-					  	<!-- HIDDEN -->
-						<textarea name="rhythms_translated" id="rhythms_translated" style="display:none;"></textarea>
-						<div class="img-responsive" id="rhythm_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
-				  	</form>
-				</div>
-	  		</div>
+							<div id="notes_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
+						</form>
+  					</div>
+  				</li>
+  				<li>
+  					<div class="collapsible-header"><i class="material-icons">straighten</i>Rhythm</div>
+  					<div class="collapsible-body">
+  						<form method="post" id="inputs">
+				  			<div>Enter your rhythm here without regard for notes</div>
+				  			<div class="input-field">
+						  		<textarea name="rhythms" id="rhythms_input" cols="80" rows="5" oninput="updateFields('rhythms')">8 8 4 8 8 4</textarea>
+						  	</div>
+						  	<!-- HIDDEN -->
+							<textarea name="rhythms_translated" id="rhythms_translated" style="display:none;"></textarea>
+							<div class="img-responsive" id="rhythm_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
+					  	</form>
+  					</div>
+  				</li>
+  			</ul>
 		 </main>
-		 <footer></footer>
+		 <footer>Copyright © Antoine Guenet 2017</footer>
     
   	</body>
 </html>

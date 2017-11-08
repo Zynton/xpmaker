@@ -1,6 +1,7 @@
 function get_canvas_dim(canvas_id, sw) {
-	var w = $('.container').width();
-	var e = $('#' + canvas_id).width();
+	var w = $('.collapsible').width();
+	//var e = $('#' + canvas_id).width();
+	var e = sw/4;
 	//console.log("w = " + w);
 	//console.log("e = " + e);
 	var sw = sw;
@@ -45,7 +46,6 @@ function updateNotes() {
 			new_str = new_str.substr(0, position) + '0' + new_str.substr(position + 1, new_str.length);
 		};
 		n_str = new_str.replace(/[0]+/g, '\n');
-		console.log(n_str)
 	};
 	n_str = "L: 1/2\n" + n_str;
 
@@ -96,8 +96,8 @@ function removeTrailingSpace(str) {
 };
 
 function updateXP() {
-	var title = $('#title_input').val() || "XP";
-	var bpm = $('#bpm_input').val() || "100";
+	var title = $('#title_input').val();// || "XP";
+	var bpm = $('#bpm_input').val();// || "100";
 
 	var notes_str = $('#notes_input').val();
 	notes_str = removeTrailingSpace(notes_str);
@@ -125,7 +125,7 @@ function updateXP() {
 									 		 	  downloadLabel:"Download %T.mid"
 									 		   },
 									 		   warnings_id: "warnings",
-									 		   render_options: get_canvas_dim("xp_canvas", 800),
+									 		   render_options: get_canvas_dim("xp_canvas", 650),
 									 		   parser_params: {},
 									 		   generate_midi: true,
 									 		   generate_warnings: false
@@ -137,9 +137,14 @@ function update_text_field(field_id, text) {
 };
 
 function mk_abcjs_text(title, bpm, xp_abcjs, ts) {
-	var abcjs_text = "T: " + title;
-	abcjs_text += "\nL: 1";
-	abcjs_text += "\nQ: " + bpm;
+	var abcjs_text = "";
+	if (title !== undefined || title === "") {
+		abcjs_text += "T: " + title + "\n";
+	};
+	abcjs_text += "L: 1";
+	if (bpm !== undefined || bpm === "") {
+		abcjs_text += "\nQ: " + bpm;
+	};
 	abcjs_text += "\nM: " + ts[0] + "/" + ts[1];
 	abcjs_text += "\n||: " + xp_abcjs + ":||";
 
