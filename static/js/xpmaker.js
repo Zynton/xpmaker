@@ -1,3 +1,24 @@
+function get_canvas_dim(canvas_id, sw) {
+	var w = $('.container').width();
+	var e = $('#' + canvas_id).width();
+	console.log("w = " + w);
+	console.log("e = " + e);
+	var sw = sw;
+	var scale = 1.0;
+	
+	var arealeft = w - e;
+	console.log("arealeft = " + arealeft);
+	if (arealeft < (sw + (sw/3))) {
+		scale = scale * (arealeft - 50)/ sw;
+		sw = arealeft - 50;			
+		//console.log("scale = " + scale);
+		//console.log("sw = " + sw);
+	};
+
+	$('#paperid').width = sw;
+	return {staffwidth: sw, scale: scale};
+};
+
 function updateFields(currentField) {
 	updateXP();
 	if (currentField == "notes") {
@@ -30,7 +51,11 @@ function updateNotes() {
 
 	$('#notes_translated').val(n_str); // Put new string in a hidden textarea
 	// Update the svg score
-	notes_editor = new ABCJS.Editor("notes_translated", { canvas_id: "notes_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
+	notes_editor = new ABCJS.Editor("notes_translated",
+									{ canvas_id: "notes_canvas",
+									  midi_id:"rhythm_midi",
+									  warnings_id:"warnings",
+									  render_options: get_canvas_dim("notes_canvas", 350) });
 };
 
 function updateRhythms() {
@@ -59,7 +84,11 @@ function updateRhythms() {
 
 	$('#rhythms_translated').val(r_str); // Put new string in a hidden textarea
 	// Update the svg score
-	rhythm_editor = new ABCJS.Editor("rhythms_translated", { canvas_id: "rhythm_canvas", midi_id:"rhythm_midi", warnings_id:"warnings" });
+	rhythm_editor = new ABCJS.Editor("rhythms_translated",
+									 { canvas_id: "rhythm_canvas",
+									   midi_id:"rhythm_midi",
+									   warnings_id:"warnings",
+									   render_options: get_canvas_dim("rhythm_canvas", 350) });
 };
 
 function removeTrailingSpace(str) {
@@ -89,17 +118,18 @@ function updateXP() {
 	xp_input.val(abcjs_text);
 
 	xp_editor = new ABCJS.Editor("xp_input", { canvas_id: "xp_canvas",
-												 		 midi_id: "xp_midi",
-												 		 midi_download_id: "xp_midi_dl",
-												 		 midi_options: {
-												 		 	generateDownload:"true",
-												 		 	downloadLabel:"Download %T.mid"
-												 		 },
-												 		 warnings_id: "warnings",
-												 		 parser_params: {},
-												 		 generate_midi: true,
-												 		 generate_warnings: false
-											    });
+									 		   midi_id: "xp_midi",
+									 		   midi_download_id: "xp_midi_dl",
+									 		   midi_options: {
+									 		 	  generateDownload:"true",
+									 		 	  downloadLabel:"Download %T.mid"
+									 		   },
+									 		   warnings_id: "warnings",
+									 		   render_options: get_canvas_dim("xp_canvas", 800),
+									 		   parser_params: {},
+									 		   generate_midi: true,
+									 		   generate_warnings: false
+											   });
 };
 
 function update_text_field(field_id, text) {

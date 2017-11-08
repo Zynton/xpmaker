@@ -25,7 +25,7 @@
 		  		<div class="input-field">
 			  		<textarea name="xp" id="xp_input", cols="80", rows="5"></textarea>
 			  	</div>
-		  		<div id="xp_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
+		  		<div id="xp_canvas" class="center" style="width: 200px; overflow: hidden; height: 420.348px;"></div>
 		  		<div id="xp_midi"></div>
 		  		<div id="xp_midi_dl"></div>
 
@@ -45,6 +45,15 @@
 								updateFields('rhythms');
 								updateXP();
 							};
+
+							/*window.onresize = function(event) {
+								do_resize();
+							};
+
+							window.onload = function() {
+								do_resize();
+							}*/
+
 						</script>
 						<div class="input-field">
 						  	<textarea name="notes" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">F A c</textarea>
@@ -52,7 +61,7 @@
 						<!-- HIDDEN : -->
 					  	<textarea name="notes_translated" id="notes_translated" style="display:none;"></textarea>
 
-						<div id="notes_canvas" style="width: 50px; overflow: hidden; height: 464.403px;"></div>
+						<div id="notes_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
 					</form>
 		  		</div>
 
@@ -65,7 +74,7 @@
 					  	</div>
 					  	<!-- HIDDEN -->
 						<textarea name="rhythms_translated" id="rhythms_translated" style="display:none;"></textarea>
-						<div class="img-responsive" id="rhythm_canvas" style="width: 771.513px; overflow: hidden; height: 464.403px;"></div>
+						<div class="img-responsive" id="rhythm_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
 				  	</form>
 				</div>
 	  		</div>
