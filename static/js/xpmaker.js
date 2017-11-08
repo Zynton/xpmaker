@@ -27,7 +27,6 @@ function updateRhythms() {
 	input_r = removeTrailingSpace(input_r); // Remove trailing spaces
 
 	var r_str = input_r.replace(/^|\D+/g, ' B/').slice(1); // Add "B/" before each number
-	r_str = adjust_beams(r_str);
 
 	// Get time signature
 	var length = 0;
@@ -38,7 +37,12 @@ function updateRhythms() {
 	};
 	var ts = length_to_time_signature(length)
 	ts = divide_ts(ts);
+
+	var matrix = abcjs_str_to_full_matrix(r_str, ts); // MUST always come before adjust_beams (depends on the spaces)
+	console.log(matrix);
+	r_str = adjust_beams(r_str);
 	r_str = make_bars_fit(ts, r_str);
+	r_str = auto_line_break(r_str, matrix, 2);
 
 	r_str = "L: 1\nK: perc stafflines=1\nM:" + ts[0] + '/' + ts[1] + '\n' + r_str;
 
@@ -133,7 +137,7 @@ function create_abcjs_xp(xp) {
 	time_signature = divide_ts(time_signature);
 
 	var matrix = abcjs_str_to_full_matrix(abcjs_str, time_signature); // MUST always come before adjust_beams (depends on the spaces)
-	abcjs_str = auto_line_break(abcjs_str, matrix);
+	abcjs_str = auto_line_break(abcjs_str, matrix, 4);
 
 	abcjs_str = make_bars_fit(time_signature, abcjs_str);
 	abcjs_str = adjust_beams(abcjs_str);
@@ -141,8 +145,8 @@ function create_abcjs_xp(xp) {
 	return [abcjs_str, time_signature];
 };
 
-function auto_line_break(abcjs_str, matrix) {
-	var indexes = get_each_nth_bars(4, matrix);
+function auto_line_break(abcjs_str, matrix, n) {
+	var indexes = get_each_nth_bars(n, matrix);
 	for (var i = 0; i < indexes.length; i++) {
 		var position = getPosition(abcjs_str, ' ', indexes[i]);
 		abcjs_str = abcjs_str.substr(0, position) + '\n' + abcjs_str.substr(position + 1, abcjs_str.length);
@@ -152,12 +156,12 @@ function auto_line_break(abcjs_str, matrix) {
 
 function get_each_nth_bars(n, matrix) {
 	var indexes = [];
-	var n = 4;
 	for (var i = 0; i < matrix[0].length; i++) {
-		if (matrix[3][i] % n == 0 && matrix[4][i] == 1) {
+		if (matrix[3][i] % (n+1) == 0 && matrix[4][i] == 1) {
 			indexes.push(i);
 		};
 	};
+	console.log(indexes);
 	return indexes;
 };
 
