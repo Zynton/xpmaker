@@ -124,6 +124,7 @@ function create_abcjs_xp(xp) {
 	var time_signature = length_to_time_signature(length);
 	time_signature = divide_ts(time_signature);
 	abcjs_str = make_bars_fit(time_signature, abcjs_str);
+	abcjs_str = adjust_beams(abcjs_str, time_signature);
 
 	return [abcjs_str, time_signature];
 };
@@ -159,20 +160,33 @@ function make_bars_fit(ts, abcjs_str) {
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
 		current_bar += ts[1] / parseInt(rhythms[i]); // convert rhythm to make sense with ts den
-		console.log(current_bar);
 		if (current_bar >= ts[0]) {
-			console.log("new bar");
 			var j = getPosition(abcjs_str, ' ', i+1); // find the position of the note in the string
 			abcjs_str = abcjs_str.substring(0, j) + '|' + abcjs_str.substring(j, abcjs_str.length); // add bar line
 			current_bar -= ts[0]; // reset length
-		}
-
-	}
+		};
+	};
 	return abcjs_str;
 };
 
 function adjust_beams(abcjs_str, ts) {
-	return abcjs_str;
+	var rhythms = rhythm_from_abcjs(abcjs_str); // make list of rhythms out of the string
+	abcjs_str = abcjs_str.replace(/[ ]+/g, '0');
+	current_bar = 0;
+	var new_str = abcjs_str;
+	for (var i = 0; i < rhythms.length; i++) {
+		current_bar += ts[1] / parseInt(rhythms[i]); // convert rhythm to make sense with ts den
+		if (current_bar <= ts[0] && i > 0) {
+			j = getPosition(abcjs_str, '0', i);
+			new_str = new_str.substr(0,j) + '%' + new_str.substr(j+1,new_str.length);
+		};
+		if (current_bar >= ts[0]) {
+			current_bar -= ts[0]; // reset length
+		};
+	};
+	new_str = new_str.replace(/[0]+/g, ' ');
+	new_str = new_str.replace(/[%]+/g, '');
+	return new_str;
 }
 
 function getPosition(string, subString, index) {
