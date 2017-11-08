@@ -22,7 +22,7 @@
 
   			<ul class="collapsible" data-collapsible="expandable">
   				<li>
-  					<div class="collapsible-header active"><i class="material-icons">hearing</i>Resulting Loop</div>
+  					<div class="collapsible-header"><i class="material-icons">hearing</i>Resulting Loop</div>
 				    <div class="collapsible-body center-align">
 				  		<div id="xp_canvas" class="center-align" style="width: 100%; overflow: hidden; height: 400px;"></div>
 				  		<div id="xp_midi"></div>
@@ -32,6 +32,60 @@
 					  		<textarea name="xp" id="xp_input" style="display:none"></textarea>
 					  	</div>
 				    </div>
+  				</li>
+  				<li>
+  					<div class="collapsible-header"><i class="material-icons">music_note</i>Matrix</div>
+  					<div class="collapsible-body">
+  						<div class="row">
+  							<div class="col m6">
+  								<h4>Notes</h4>
+		  						<form method="post" id="inputs">
+									<div>Enter your notes here without regard for rhythm.</div>
+									<script type="text/javascript">
+										window.onload = function() {
+											updateFields('notes');
+											updateFields('rhythms');
+											updateXP();
+										};
+
+										function toggle_xp_input_display() {
+											var xp_input = $('#xp_input');
+											xp_input.toggle();
+											xp_input.focus();
+										};
+
+										/*window.onresize = function(event) {
+											do_resize();
+										};
+
+										window.onload = function() {
+											do_resize();
+										}*/
+
+									</script>
+									<div class="input-field">
+									  	<textarea name="notes" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">F _A E ^G ^A ^G z</textarea>
+									</div>
+									<!-- HIDDEN : -->
+								  	<textarea name="notes_translated" id="notes_translated" style="display:none;"></textarea>
+
+									<div id="notes_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
+								</form>
+							</div>
+							<div class="col m6">
+								<h4>Rhythm</h4>
+								<form method="post" id="inputs">
+					  			<div>Enter your rhythm here without regard for notes</div>
+					  			<div class="input-field">
+							  		<textarea name="rhythms" id="rhythms_input" cols="80" rows="5" oninput="updateFields('rhythms')">8 8 4 8 8 4</textarea>
+							  	</div>
+							  	<!-- HIDDEN -->
+								<textarea name="rhythms_translated" id="rhythms_translated" style="display:none;"></textarea>
+								<div class="img-responsive" id="rhythm_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
+							  	</form>
+							</div>
+						</div>
+  					</div>
   				</li>
   				<li>
   					<div class="collapsible-header"><i class="material-icons">info</i>Info</div>
@@ -45,57 +99,6 @@
 			  				<input placeholder="Tempo" type="number" name="bpm" id="bpm_input" oninput="updateXP()">
 			  				<label for="bpm_input">Tempo</label>
 			  			</div>
-  					</div>
-  				</li>
-  				<li>
-  					<div class="collapsible-header"><i class="material-icons">music_note</i>Notes</div>
-  					<div class="collapsible-body">
-  						<form method="post" id="inputs">
-							<div>Enter your notes here without regard for rhythm.</div>
-							<script type="text/javascript">
-								window.onload = function() {
-									updateFields('notes');
-									updateFields('rhythms');
-									updateXP();
-								};
-
-								function toggle_xp_input_display() {
-									var xp_input = $('#xp_input');
-									xp_input.toggle();
-									xp_input.focus();
-								};
-
-								/*window.onresize = function(event) {
-									do_resize();
-								};
-
-								window.onload = function() {
-									do_resize();
-								}*/
-
-							</script>
-							<div class="input-field">
-							  	<textarea name="notes" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">F _A E ^G ^A ^G z</textarea>
-							</div>
-							<!-- HIDDEN : -->
-						  	<textarea name="notes_translated" id="notes_translated" style="display:none;"></textarea>
-
-							<div id="notes_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
-						</form>
-  					</div>
-  				</li>
-  				<li>
-  					<div class="collapsible-header"><i class="material-icons">straighten</i>Rhythm</div>
-  					<div class="collapsible-body">
-  						<form method="post" id="inputs">
-				  			<div>Enter your rhythm here without regard for notes</div>
-				  			<div class="input-field">
-						  		<textarea name="rhythms" id="rhythms_input" cols="80" rows="5" oninput="updateFields('rhythms')">8 8 4 8 8 4</textarea>
-						  	</div>
-						  	<!-- HIDDEN -->
-							<textarea name="rhythms_translated" id="rhythms_translated" style="display:none;"></textarea>
-							<div class="img-responsive" id="rhythm_canvas" style="width: 100px; overflow: hidden; height: 420.348px;"></div>
-					  	</form>
   					</div>
   				</li>
   			</ul>
