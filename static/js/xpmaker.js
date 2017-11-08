@@ -27,8 +27,9 @@ function updateRhythms() {
 	input_r = input_r.replace(/[-,;:\/\']+/g, ' '); // Replace separators with space
 	input_r = removeTrailingSpace(input_r); // Remove trailing spaces
 
-	var r_str = "L: 1\nK: perc stafflines=1\n"; // Make new string
-	r_str += input_r.replace(/^|\D+/g, ' B/').slice(1); // Add "B/" before each number
+	var r_str = input_r.replace(/^|\D+/g, ' B/').slice(1); // Add "B/" before each number
+	r_str = adjust_beams(r_str);
+	r_str = "L: 1\nK: perc stafflines=1\n" + r_str;
 
 	$('#rhythms_translated').val(r_str); // Put new string in a hidden textarea
 	// Update the svg score
@@ -124,7 +125,7 @@ function create_abcjs_xp(xp) {
 	var time_signature = length_to_time_signature(length);
 	time_signature = divide_ts(time_signature);
 	abcjs_str = make_bars_fit(time_signature, abcjs_str);
-	abcjs_str = adjust_beams(abcjs_str, time_signature);
+	abcjs_str = adjust_beams(abcjs_str);
 
 	return [abcjs_str, time_signature];
 };
@@ -173,19 +174,20 @@ function make_bars_fit(ts, abcjs_str) {
 	return abcjs_str;
 };
 
-function adjust_beams(abcjs_str, ts) {
+function adjust_beams(abcjs_str) {
 	var rhythms = rhythm_from_abcjs(abcjs_str); // make list of rhythms out of the string
 	abcjs_str = abcjs_str.replace(/[ ]+/g, '0');
-	current_bar = 0;
+	current_beat = 0;
 	var new_str = abcjs_str;
 	for (var i = 0; i < rhythms.length; i++) {
-		current_bar += ts[1] / parseInt(rhythms[i]); // convert rhythm to make sense with ts den
-		if (current_bar <= ts[0] && i > 0) {
+		r_length = 4 / parseInt(rhythms[i]); // convert rhythm to make sense with ts den
+		current_beat += r_length;
+		if (current_beat <= 1 && i > 0 && current_beat > r_length) {
 			j = getPosition(abcjs_str, '0', i);
 			new_str = new_str.substr(0,j) + '%' + new_str.substr(j+1,new_str.length);
 		};
-		if (current_bar >= ts[0]) {
-			current_bar -= ts[0]; // reset length
+		if (current_beat >= 1) {
+			current_beat = 0; // reset length
 		};
 	};
 	new_str = new_str.replace(/[0]+/g, ' ');
