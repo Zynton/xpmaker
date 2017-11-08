@@ -76,8 +76,8 @@ function updateRhythms() {
 	ts = divide_ts(ts);
 
 	var matrix = abcjs_str_to_full_matrix(r_str, ts); // MUST always come before adjust_beams (depends on the spaces)
-	r_str = adjust_beams(r_str);
 	r_str = make_bars_fit(ts, r_str);
+	r_str = adjust_beams(r_str);
 	r_str = auto_line_break(r_str, matrix, 2);
 
 	r_str = "L: 1\nK: perc stafflines=1\nM:" + ts[0] + '/' + ts[1] + '\n' + r_str;
@@ -241,6 +241,7 @@ function divide_ts(ts) {
 };
 
 function make_bars_fit(ts, abcjs_str) {
+	console.log(abcjs_str);
 	var rhythms = rhythm_from_abcjs(abcjs_str); // make list of rhythms out of the string
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
