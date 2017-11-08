@@ -13,8 +13,20 @@ function updateNotes() {
 	input_n = input_n.replace(/[-,;:\/\']+/g, ' '); // Replace separators with space
 	input_n = removeTrailingSpace(input_n); // Remove trailing spaces
 
-	var n_str = "L: 1\n"; // Make new string
-	n_str += input_n;
+	var n_str = input_n; // Make new string
+	// line breaks:
+	input_l = input_n.split(/[ ]+/);
+	break_n = 4;
+	if (input_l.length >= break_n) {
+		var new_str = n_str;
+		for (var i = break_n; i < input_l.length; i += break_n) {
+			var position = getPosition(n_str, ' ', i);
+			new_str = new_str.substr(0, position) + '0' + new_str.substr(position + 1, new_str.length);
+		};
+		n_str = new_str.replace(/[0]+/g, '\n');
+		console.log(n_str)
+	};
+	n_str = "L: 1/2\n" + n_str;
 
 	$('#notes_translated').val(n_str); // Put new string in a hidden textarea
 	// Update the svg score
@@ -39,7 +51,6 @@ function updateRhythms() {
 	ts = divide_ts(ts);
 
 	var matrix = abcjs_str_to_full_matrix(r_str, ts); // MUST always come before adjust_beams (depends on the spaces)
-	console.log(matrix);
 	r_str = adjust_beams(r_str);
 	r_str = make_bars_fit(ts, r_str);
 	r_str = auto_line_break(r_str, matrix, 2);
@@ -161,7 +172,6 @@ function get_each_nth_bars(n, matrix) {
 			indexes.push(i);
 		};
 	};
-	console.log(indexes);
 	return indexes;
 };
 
