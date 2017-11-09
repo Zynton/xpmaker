@@ -1,7 +1,6 @@
 /*
 TODO:
 
-- Clean up
 - Function to tie notes that go over barlines
 - Implement localstorage ?
 */
@@ -35,11 +34,11 @@ function updateXP(notes_str, rhythms_str, title, bpm, out_id) {
 	var notes_a = notes_str.split(/[ ]+/);
 
 	// Make array of rhythms out of input
-	rhythms_str = clean_input_str(rhythm_str);
+	rhythms_str = clean_input_str(rhythms_str);
 	var rhythms_a = rhythms_str.split(/[\D]+/);
 
 	// Generate the loop
-	var xp_abc = make_abc_xp(notes_a, rhythms_a);
+	var xp_abc = make_xp_abc(notes_a, rhythms_a);
 	var ts = r_to_ts(rhythms_a);
 	
 	// Format the loop
@@ -202,10 +201,19 @@ function format_abc_str(n_str, ts, n_bars_break) {
 	// The order of operations here is crucial!
 	// TODO: make it less so (bug prone)
 	var matrix = abc_str_to_full_matrix(n_str, ts);
-	var abc_str = add_barlines(ts, n_str);
-	abc_str = adjust_beams(abc_str);
+	var abc_str = add_ties(n_str, ts, matrix);
+	abc_str = add_barlines(abc_str, ts);
 	abc_str = line_break_every_n_bars(abc_str, matrix, n_bars_break);
-	return abc_str
+	abc_str = adjust_beams(abc_str);
+	return abc_str;
+};
+
+function add_ties(n_str, ts, matrix) {
+	var indexes = get_each_nth_bars(1, matrix);
+	for (var i = 0; i < indexes.length; i++) {
+		indexes[i] = indexes[i] - 1;
+	};
+	return n_str;
 };
 
 // Takes an input rhythm string (ex.: '4 8 16').
@@ -224,11 +232,11 @@ function add_intro_to_abc_str(title, bpm, xp_abc, ts) {
 	};
 	abc_intro += "L: 1\n";
 	if (bpm !== undefined || bpm === "") {
-		abc_intro += "\nQ: " + bpm + "\n";
+		abc_intro += "Q: " + bpm + "\n";
 	};
 	abc_intro += "M: " + ts[0] + "/" + ts[1] + "\n";
 
-	var abc_str = "||: " + xp_abc + ":||";
+	var abc_str = abc_intro + "||: " + xp_abc + ":||";
 	return abc_str;
 };
 
@@ -285,14 +293,14 @@ function make_xp_abc(notes_a, rhythms_a) {
 // The notes and rhythms are distributed to each other.
 // (ex.: [ ['C', '4'], ['d', '8'], ['C', '16'], ['d', '4'], ['C', '8'], ['d', '16'] ]).
 function xp_mix_and_match(notes_a, rhythms_a) {
-	var note = [notes[0], rhythms[0]];
+	var note = [notes_a[0], rhythms_a[0]];
 	var xp = [note];
 	var notes_i = 0;
 	var rhythms_i = 0;
 	while(true) {
-		notes_i = (notes_i + 1) % notes.length;
-		rhythms_i = (rhythms_i + 1) % rhythms.length;
-		note = [notes[notes_i], rhythms[rhythms_i]];
+		notes_i = (notes_i + 1) % notes_a.length;
+		rhythms_i = (rhythms_i + 1) % rhythms_a.length;
+		note = [notes_a[notes_i], rhythms_a[rhythms_i]];
 		if (notes_i == 0 && rhythms_i == 0) {
 			break;
 		};
@@ -362,7 +370,7 @@ function add_barlines(abc_str, ts) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
-		current_bar +=  rhythm_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
+		current_bar +=  r_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
 		if (current_bar >= ts[0]) {
 			var j = getPosition(abc_str, ' ', i+1); // find the position of the note in the string
 			abc_str = abc_str.substring(0, j) + '|' + abc_str.substring(j, abc_str.length); // add bar line
@@ -376,11 +384,11 @@ function add_barlines(abc_str, ts) {
 // Returns an updated string with adjusted beams per beat (ex.: "C/4 d/8E/16E/16 C/4").
 function adjust_beams(abc_str) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
-	abc_str = abcjs_str.replace(/[ ]+/g, '0');
+	abc_str = abc_str.replace(/[ ]+/g, '0');
 	current_beat = 0;
 	var new_str = abc_str;
 	for (var i = 0; i < rhythms.length; i++) {
-		r_length = rhythm_to_length(rhythms[i]); // convert rhythm to make sense with ts den
+		r_length = r_to_length(rhythms[i]); // convert rhythm to make sense with ts den
 		current_beat += r_length;
 		if (current_beat <= 1 && i > 0 && current_beat > r_length) {
 			j = getPosition(abc_str, '0', i);
@@ -429,7 +437,7 @@ function abc_str_to_full_matrix(abc_str, ts) {
 	for (var i = 0; i < rhythms.length; i++) {
 		beat_nrs.push(beat_nr + 1);
 		bar_nrs.push(bar_nr);
-		beat_nr += rhythm_to_length(rhythms[i], ts[1]);
+		beat_nr += r_to_length(rhythms[i], ts[1]);
 		if (beat_nr >= ts[0]) {
 			beat_nr -= ts[0];
 			bar_nr++;
@@ -463,7 +471,7 @@ function get_nr(option, abc_str, index, ts) {
 	var length = 0;
 	var bar_nr = 0;
 	for (var i = 0; i < index; i++) {
-		length += rhythm_to_length(rhythms[i], ts[1]);
+		length += r_to_length(rhythms[i], ts[1]);
 		if (length >= ts[0]) {
 			length -= ts[0];
 			bar_nr++;
