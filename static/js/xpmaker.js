@@ -1,3 +1,13 @@
+/*
+TODO:
+
+- Clean up
+- Put staff formatting functions in a sequential wrapper
+- Function to tie notes that go over barlines
+- Implement localstorage ?
+
+*/
+
 function get_canvas_dim(canvas_id, sw) {
 	var w = $('.collapsible').width();
 	//var e = $('#' + canvas_id).width();
@@ -241,7 +251,6 @@ function divide_ts(ts) {
 };
 
 function make_bars_fit(ts, abcjs_str) {
-	console.log(abcjs_str);
 	var rhythms = rhythm_from_abcjs(abcjs_str); // make list of rhythms out of the string
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
@@ -252,7 +261,6 @@ function make_bars_fit(ts, abcjs_str) {
 			current_bar -= ts[0]; // reset length
 		};
 	};
-	console.log(abcjs_str);
 	return abcjs_str;
 };
 

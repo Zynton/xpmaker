@@ -14,9 +14,10 @@
   		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   		<link rel="stylesheet" href="{{ url_for('bower.static', filename='materialize/dist/css/materialize.min.css') }}" media="all" type="text/css" />
   		<link rel="stylesheet" href="{{ url_for('static', filename='css/abcjs-midi.css') }}" media="all" type="text/css" />
+  		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" media="all" type="text/css" />
   		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   	</head>
-  	<body class="light-blue lighten-2">
+  	<body class="indigo lighten-4">
   		<header><h1 class="center-align">Weird loop Maker</h1></header>
   		<main class="container">
 
@@ -103,7 +104,12 @@
   				</li>
   			</ul>
 		 </main>
-		 <footer>Copyright © Antoine Guenet 2017</footer>
+		 <footer class="footer-copyright indigo lighten-3">
+	        	<div class="container white-text">
+	        		© 2017 Antoine Guenet
+	        	</div>
+	      	</div>
+		 </footer>
     
   	</body>
 </html>
