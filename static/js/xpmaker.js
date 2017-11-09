@@ -224,17 +224,12 @@ function add_ties(n_str, matrix) {
 	var ts = matrix[2];
 	var current_length = 0;
 	for (var i = 0; i < matrix[0].length; i++) {
-		console.log("i: " + i);
 		var note_name = matrix[0][i];
 		var rhythm_str = matrix[1][i];
-		console.log("note_name: " + note_name);
-		console.log("rhythm_str: " + rhythm_str);
 
 		var note_length = r_to_length(rhythm_str);
-		console.log("note length: " + note_length);
 		var available_time = 1;
 		current_length += note_length;
-		console.log("current_length: " + current_length);
 		// If we're somewhere within the first, third or fifth beat (etc.),
 		// the note cannot be longer that 2 beats (eases reading).
 		/*if (matrix[4][i] % 2 == 1) {
@@ -244,10 +239,8 @@ function add_ties(n_str, matrix) {
 		if (current_length == 1) {
 			current_length = 0;
 		};
-		console.log("available_time: " + available_time);
 		// If we go beyond the available time, we split the note.
 		if (current_length > available_time) {
-			console.log("current_length > available_time\n\n");
 			// Get length of the split note
 			var first_note_length = available_time - current_length + note_length;
 			var second_note_length = note_length - first_note_length;
@@ -259,16 +252,14 @@ function add_ties(n_str, matrix) {
 			// Create the string that should replace the original note in the abc_str
 			var replacement_str = '(' + note_name + '/' + first_note_r_str;
 			replacement_str += '0' + note_name + '/' + second_note_r_str + ')';
-			//console.log(replacement_str);
 
 			// Insert the new note and rhythm in the string
 			var position = getPosition(n_str, ' ', i);
 			var old_str = note_rhythm_to_abc(note_name, rhythm_str);
 			n_str = n_str.substr(0, position +1) + replacement_str + n_str.substr(position +1 + old_str.length, n_str.length);
-			//console.log(n_str);
 
-			// Reset current_length
-			current_length = 0;
+			// Reset current_length (the next beat starts with the second note's length)
+			current_length = second_note_length;
 		};
 	};
 
