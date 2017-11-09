@@ -125,7 +125,7 @@ function r_to_length(rhythm, ts_den) {
     return length;
 };
 
-// Takes a single rhythm string (ex.: '4.').
+// Takes a single rhythm string (ex.: '4.') and the denominator of a time signature.
 // Returns the length in beats (ex.: 1.5).
 function r_str_to_length(rhythm_str, ts_den) {
 	tuplet_re = /.*:(\d+)$/;
@@ -143,6 +143,15 @@ function r_str_to_length(rhythm_str, ts_den) {
 	
 	var length_in_beats = ts_den / rhythm_float;
 	return length_in_beats;
+};
+
+// Takes a length in beats (ex.: 1.5) and the denominator of a time signature.
+// Returns a single rhythm string (ex.: '4.').
+function length_to_r_str(length, ts_den) {
+	var rhythm_float = ts_den / length;
+	var rhythm_str = '' + rhythm_float;
+
+	return rhythm_str;
 };
 
 // Takes a note length in beats (ex.: 1.5 for a dotted qn).
@@ -200,19 +209,71 @@ function input_r_to_abc_str(input_r, ts, n_bars_break) {
 function format_abc_str(n_str, ts, n_bars_break) {
 	// The order of operations here is crucial!
 	// TODO: make it less so (bug prone)
-	var matrix = abc_str_to_full_matrix(n_str, ts);
-	var abc_str = add_ties(n_str, ts, matrix);
+	var matrix = abc_str_to_matrix(n_str, ts);
+	var abc_str = add_ties(n_str, matrix);
 	abc_str = add_barlines(abc_str, ts);
 	abc_str = line_break_every_n_bars(abc_str, matrix, n_bars_break);
 	abc_str = adjust_beams(abc_str);
 	return abc_str;
 };
 
-function add_ties(n_str, ts, matrix) {
-	var indexes = get_each_nth_bars(1, matrix);
-	for (var i = 0; i < indexes.length; i++) {
-		indexes[i] = indexes[i] - 1;
+// Takes an abcjs valid string with notes (but no extra info)
+// (ex.: 'B/4 B/8 B/16') and a matrix array.
+// Returns an updated string with modified notes to allow them to tie over beats.
+function add_ties(n_str, matrix) {
+	var ts = matrix[2];
+	var current_length = 0;
+	for (var i = 0; i < matrix[0].length; i++) {
+		console.log("i: " + i);
+		var note_name = matrix[0][i];
+		var rhythm_str = matrix[1][i];
+		console.log("note_name: " + note_name);
+		console.log("rhythm_str: " + rhythm_str);
+
+		var note_length = r_to_length(rhythm_str);
+		console.log("note length: " + note_length);
+		var available_time = 1;
+		current_length += note_length;
+		console.log("current_length: " + current_length);
+		// If we're somewhere within the first, third or fifth beat (etc.),
+		// the note cannot be longer that 2 beats (eases reading).
+		/*if (matrix[4][i] % 2 == 1) {
+			available_time = 2;
+		};*/
+		// Reset if we've hit the available time.
+		if (current_length == 1) {
+			current_length = 0;
+		};
+		console.log("available_time: " + available_time);
+		// If we go beyond the available time, we split the note.
+		if (current_length > available_time) {
+			console.log("current_length > available_time\n\n");
+			// Get length of the split note
+			var first_note_length = available_time - current_length + note_length;
+			var second_note_length = note_length - first_note_length;
+
+			// Translate into a rhythm string
+			var first_note_r_str = length_to_r_str(first_note_length, 4); // TODO FIX PROBLEM IN LENGTH_TO_R
+			var second_note_r_str = length_to_r_str(second_note_length, 4);
+			
+			// Create the string that should replace the original note in the abc_str
+			var replacement_str = '(' + note_name + '/' + first_note_r_str;
+			replacement_str += '0' + note_name + '/' + second_note_r_str + ')';
+			//console.log(replacement_str);
+
+			// Insert the new note and rhythm in the string
+			var position = getPosition(n_str, ' ', i);
+			var old_str = note_rhythm_to_abc(note_name, rhythm_str);
+			n_str = n_str.substr(0, position +1) + replacement_str + n_str.substr(position +1 + old_str.length, n_str.length);
+			//console.log(n_str);
+
+			// Reset current_length
+			current_length = 0;
+		};
 	};
+
+	n_str = n_str.replace(/[0]+/g, ' ');
+
 	return n_str;
 };
 
@@ -417,6 +478,24 @@ function get_each_nth_bars(n, matrix) {
 	return indexes;
 };
 
+// Takes a matrix.
+// Returns an array containing the index of the last note of each bar.
+function get_last_of_bar(matrix) {
+	var indexes = [];
+	for (var i = 0; i < matrix[0].length; i++) {
+		// if we're on the first beat, take the note just before's index
+		// (unless it's the very first beat of the melody).
+		if (matrix[4][i] == 1) {
+			if ( i - 1 >= 0) {
+				indexes.push(i-1);
+			};
+		};
+	};
+	// Add the very last note's index
+	indexes.push(matrix[0].length - 1);
+	return indexes;
+};
+
 // PARSING //
 // ======= //
 
@@ -425,7 +504,7 @@ function get_each_nth_bars(n, matrix) {
 // Returns an array of aligned values :
 // [[notes], [rhythms], [time signatures], [bar numbers], [beat numbers]].
 // /!\ Bar and beat numbers are 1-indexed for consistency with music theory.
-function abc_str_to_full_matrix(abc_str, ts) {
+function abc_str_to_matrix(abc_str, ts) {
 	var notes = notes_from_abc(abc_str);
 	var rhythms = rhythm_from_abc(abc_str);
 	var bar_nrs = [];
@@ -465,7 +544,7 @@ function get_nr(option, abc_str, index, ts) {
     	option = "beat";
     };
 
-	var matrix = abc_str_to_full_matrix(abc_str, ts);
+	var matrix = abc_str_to_matrix(abc_str, ts);
 	var rhythms = matrix[1];
 
 	var length = 0;
