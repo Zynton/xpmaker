@@ -2,10 +2,13 @@
 TODO:
 
 - Clean up
-- Put staff formatting functions in a sequential wrapper
+- Put staff formatting functions in a sequential wrapper (make them all use matrix?)
 - Function to tie notes that go over barlines
 - Implement localstorage ?
-
+- Bug:
+  - notes = F _A E ^G ^A ^G z F _A E ^G ^A ^G
+  - rhythms = 8 8 4 8 8 4
+  -> 1 bar breaks at the wrong moment
 */
 
 function get_canvas_dim(canvas_id, sw) {
@@ -205,8 +208,10 @@ function auto_line_break(abcjs_str, matrix, n) {
 	var indexes = get_each_nth_bars(n, matrix);
 	for (var i = 0; i < indexes.length; i++) {
 		var position = getPosition(abcjs_str, ' ', indexes[i]);
-		abcjs_str = abcjs_str.substr(0, position) + '\n' + abcjs_str.substr(position + 1, abcjs_str.length);
+		abcjs_str = abcjs_str.substr(0, position) + ' \n' + abcjs_str.substr(position + 1, abcjs_str.length);
+		console.log(abcjs_str);
 	};
+	console.log(indexes);
 	return abcjs_str;
 };
 
