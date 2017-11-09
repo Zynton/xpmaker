@@ -209,9 +209,7 @@ function auto_line_break(abcjs_str, matrix, n) {
 	for (var i = 0; i < indexes.length; i++) {
 		var position = getPosition(abcjs_str, ' ', indexes[i]);
 		abcjs_str = abcjs_str.substr(0, position) + ' \n' + abcjs_str.substr(position + 1, abcjs_str.length);
-		console.log(abcjs_str);
 	};
-	console.log(indexes);
 	return abcjs_str;
 };
 
