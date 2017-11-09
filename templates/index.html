@@ -16,14 +16,14 @@
   		<link rel="stylesheet" href="{{ url_for('static', filename='css/abcjs-midi.css') }}" media="all" type="text/css" />
   		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   	</head>
-  	<body>
+  	<body class="light-blue lighten-2">
   		<header><h1 class="center-align">Weird loop Maker</h1></header>
   		<main class="container">
 
   			<ul class="collapsible" data-collapsible="expandable">
   				<li>
   					<div class="collapsible-header"><i class="material-icons">hearing</i>Resulting Loop</div>
-				    <div class="collapsible-body center-align">
+				    <div class="collapsible-body center-align white">
 				  		<div id="xp_canvas" class="center-align" style="width: 100%; overflow: hidden; height: 400px;"></div>
 				  		<div id="xp_midi"></div>
 				  		<div id="xp_midi_dl"></div>
@@ -35,7 +35,7 @@
   				</li>
   				<li>
   					<div class="collapsible-header"><i class="material-icons">music_note</i>Matrix</div>
-  					<div class="collapsible-body">
+  					<div class="collapsible-body white">
   						<div class="row">
   							<div class="col m6">
   								<h4>Notes</h4>
@@ -89,7 +89,7 @@
   				</li>
   				<li>
   					<div class="collapsible-header"><i class="material-icons">info</i>Info</div>
-  					<div class="collapsible-body">
+  					<div class="collapsible-body white">
   						<div class="input-field col m6">
 				        	<input placeholder="Title" type="text" name="title" id="title_input" oninput="updateXP()">
 				        	<label for="title_input">Title</label>

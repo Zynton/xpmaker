@@ -183,9 +183,9 @@ function create_abcjs_xp(xp) {
 	time_signature = divide_ts(time_signature);
 
 	var matrix = abcjs_str_to_full_matrix(abcjs_str, time_signature); // MUST always come before adjust_beams (depends on the spaces)
-	abcjs_str = auto_line_break(abcjs_str, matrix, 4);
 
 	abcjs_str = make_bars_fit(time_signature, abcjs_str);
+	abcjs_str = auto_line_break(abcjs_str, matrix, 4);
 	abcjs_str = adjust_beams(abcjs_str);
 
 	return [abcjs_str, time_signature];
@@ -252,6 +252,7 @@ function make_bars_fit(ts, abcjs_str) {
 			current_bar -= ts[0]; // reset length
 		};
 	};
+	console.log(abcjs_str);
 	return abcjs_str;
 };
 
