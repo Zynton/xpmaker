@@ -229,6 +229,8 @@ function add_ties(n_str, matrix) {
 
 		var note_length = r_to_length(rhythm_str);
 		var available_time = 1;
+		/* Temporary replacement for following malfunctioning technique: */
+		if (note_length >= 2 && current_length == 0) break;
 		current_length += note_length;
 		// If we're somewhere within the first, third or fifth beat (etc.),
 		// the note cannot be longer that 2 beats (eases reading).
@@ -240,26 +242,34 @@ function add_ties(n_str, matrix) {
 			current_length = 0;
 		};
 		// If we go beyond the available time, we split the note.
-		if (current_length > available_time) {
+		var replacement_str = '(';
+		var modified = false;
+		// GO RECURSIVE!!! REPLACEMENT_STR'S SECOND HALF SHOULD BE THE FIRST OF THE NEXT RECURSION.
+		while (current_length > available_time) {
+			modified = true;
 			// Get length of the split note
 			var first_note_length = available_time - current_length + note_length;
 			var second_note_length = note_length - first_note_length;
+			console.log("first note length: " + first_note_length);
 
 			// Translate into a rhythm string
-			var first_note_r_str = length_to_r_str(first_note_length, 4); // TODO FIX PROBLEM IN LENGTH_TO_R
+			var first_note_r_str = length_to_r_str(first_note_length, 4);
 			var second_note_r_str = length_to_r_str(second_note_length, 4);
 			
 			// Create the string that should replace the original note in the abc_str
-			var replacement_str = '(' + note_name + '/' + first_note_r_str;
-			replacement_str += '0' + note_name + '/' + second_note_r_str + ')';
+			replacement_str += note_name + '/' + first_note_r_str;
+			replacement_str += '0' + note_name + '/' + second_note_r_str;
 
+			// Reset current_length (the next beat starts with the second note's length)
+			current_length = second_note_length;
+			available_time = 1;
+		};
+		replacement_str += ')';
+		if (modified === true) {
 			// Insert the new note and rhythm in the string
 			var position = getPosition(n_str, ' ', i);
 			var old_str = note_rhythm_to_abc(note_name, rhythm_str);
 			n_str = n_str.substr(0, position +1) + replacement_str + n_str.substr(position +1 + old_str.length, n_str.length);
-
-			// Reset current_length (the next beat starts with the second note's length)
-			current_length = second_note_length;
 		};
 	};
 
