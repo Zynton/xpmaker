@@ -220,7 +220,6 @@ function format_abc_str(n_str, ts, n_bars_break) {
 // (ex.: 'B/4 B/8 B/16') and a matrix array.
 // Returns an updated string with modified notes to allow them to tie over beats.
 function add_ties(n_str, matrix) {
-	var ts = matrix[2];
 	var current_length = 0;
 	for (var i = 0; i < matrix[0].length; i++) {
 		var note_name = matrix[0][i];
@@ -229,6 +228,8 @@ function add_ties(n_str, matrix) {
 		var note_length = r_to_length(rhythm_str);
 		var available_time = 1;
 
+		if (matrix[4][i] == 1) current_length = 0;
+
 		/* Temporary replacement for following malfunctioning technique: */
 		// If we're somewhere within the first, third or fifth beat (etc.),
 		// the note cannot be longer that 2 beats (eases reading).
@@ -236,7 +237,7 @@ function add_ties(n_str, matrix) {
 			available_time = 2;
 		};*/
 		if (note_length >= 2 && current_length == 0) {
-		} else if (current_length + note_length == 1) { // Reset if we've hit the available time.
+		} else if (current_length + note_length == available_time) { // Reset if we've hit the available time.
 			current_length = 0;
 		} else if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
 			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length, note_length, available_time);
@@ -247,6 +248,10 @@ function add_ties(n_str, matrix) {
 			var old_str = note_rhythm_to_abc(note_name, rhythm_str);
 			n_str = n_str.substr(0, position) + ' ' + replacement_str + ' ' + n_str.substr(position  + old_str.length + 2, n_str.length);
 			n_str = removeTrailingSpace(n_str); // clean up
+
+			// Get the last tied note's length and set the current length to that.
+			var last_note_length = r_to_length(replacement_str.substr(replacement_str.length-1, replacement_str.length-1));
+			current_length = last_note_length;
 		} else { // If not, we look at the next note in the beat
 			current_length += note_length;
 		};
