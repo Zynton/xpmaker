@@ -440,16 +440,11 @@ function add_barlines(abc_str, ts) {
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
 		current_bar += r_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
-		console.log(current_bar);
 		if (current_bar >= ts[0]) {
 			var safe_str = spaces_and_dashes_to_zeroes(abc_str);
-			console.log('safe_str: ' + safe_str);
 			var j = getPosition(safe_str, '0', i + 1); // find the position of the note in the string
-			console.log('i: ' + i);
-			console.log('j: ' + j);
 			abc_str = abc_str.substring(0, j) + '|' + abc_str.substring(j, abc_str.length); // add bar line
 			current_bar -= ts[0]; // reset length
-			console.log('reset: ' + current_bar);
 		};
 	};
 	return abc_str;
@@ -459,23 +454,24 @@ function add_barlines(abc_str, ts) {
 // Returns an updated string with adjusted beams per beat (ex.: "C/4 d/8E/16E/16 C/4").
 function adjust_beams(abc_str) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
-	abc_str = abc_str.replace(/[ ]+/g, '0');
+	var safe_str = spaces_and_dashes_to_zeroes(abc_str);
 	current_beat = 0;
-	var new_str = abc_str;
 	for (var i = 0; i < rhythms.length; i++) {
 		r_length = r_to_length(rhythms[i]); // convert rhythm to make sense with ts den
 		current_beat += r_length;
 		if (current_beat <= 1 && i > 0 && current_beat > r_length) {
-			j = getPosition(abc_str, '0', i);
-			new_str = new_str.substr(0,j) + '%' + new_str.substr(j+1,new_str.length);
-		};
-		if (current_beat >= 1) {
-			current_beat = 0; // reset length
+			console.log('i: ' + i);
+			console.log('safe_str: ' + safe_str);
+			console.log('abc_str: ' + abc_str);
+			var j = getPosition(safe_str, '0', i );
+			console.log('current_beat: ' + current_beat);
+			console.log('j: ' + j + '\n\n');
+			abc_str = abc_str.substr(0,j) + '%' + abc_str.substr(j+1,abc_str.length);
+			current_beat -= 1; // reset length
 		};
 	};
-	new_str = new_str.replace(/[0]+/g, ' ');
-	new_str = new_str.replace(/[%]+/g, '');
-	return new_str;
+	abc_str = abc_str.replace(/[%]+/g, '');
+	return abc_str;
 };
 
 // HELPERS
