@@ -265,7 +265,8 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 	// Base case:
 	if (current_length + note_length <= available_time) {
 		console.log('base case');
-		return "(" + str_sofar + '0' + str_to_transform + ")";
+		str_sofar = str_sofar.substr(1, str_sofar.length-1);
+		return str_sofar + '-' + str_to_transform;
 	} else { // Recursive case:
 		// Get note name
 		var note_name = str_to_transform.replace(/[^A-GZ-z]/g, '');
@@ -280,7 +281,7 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 		var second_note_r_str = length_to_r_str(second_note_length, 4);
 		
 		// Create the string that should replace the original note in the abc_str
-		str_sofar += note_name + '/' + first_note_r_str;
+		str_sofar += '-' + note_name + '/' + first_note_r_str;
 		str_to_transform = note_name + '/' + second_note_r_str;
 
 		console.log('str_sofar: ' + str_sofar);
