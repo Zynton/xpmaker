@@ -211,9 +211,9 @@ function format_abc_str(n_str, ts, n_bars_break) {
 	// TODO: make it less so (bug prone)
 	var matrix = abc_str_to_matrix(n_str, ts);
 	var abc_str = add_ties(n_str, matrix);
-	abc_str = add_barlines(abc_str, ts);
-	abc_str = line_break_every_n_bars(abc_str, matrix, n_bars_break);
-	abc_str = adjust_beams(abc_str);
+	//abc_str = add_barlines(abc_str, ts);
+	//abc_str = line_break_every_n_bars(abc_str, matrix, n_bars_break);
+	//abc_str = adjust_beams(abc_str);
 	return abc_str;
 };
 
@@ -245,13 +245,11 @@ function add_ties(n_str, matrix) {
 			// Insert the new note and rhythm in the string
 			var position = getPosition(n_str, ' ', i);
 			var old_str = note_rhythm_to_abc(note_name, rhythm_str);
-			n_str = n_str.substr(0, position +1) + replacement_str + n_str.substr(position +1 + old_str.length, n_str.length);
+			n_str = n_str.substr(0, position) + replacement_str + n_str.substr(position +1 + old_str.length, n_str.length - 1);
 		} else { // If not, we look at the next note in the beat
 			current_length += note_length;
 		};
 	};
-
-	n_str = n_str.replace(/[0]+/g, ' ');
 
 	return n_str;
 };
@@ -259,8 +257,8 @@ function add_ties(n_str, matrix) {
 function make_replacement_str(str_sofar, str_to_transform, current_length, note_length, available_time) {
 	// Base case:
 	if (current_length + note_length <= available_time) {
-		str_sofar = str_sofar.substr(1, str_sofar.length-1);
-		return str_sofar + '-' + str_to_transform;
+		str_sofar = str_sofar.replace(/^( -)/, '');
+		return str_sofar + ' -' + str_to_transform;
 	} else { // Recursive case:
 		// Get note name
 		var note_name = str_to_transform.replace(/[^A-GZ-z]/g, '');
@@ -274,7 +272,7 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 		var second_note_r_str = length_to_r_str(second_note_length, 4);
 		
 		// Create the string that should replace the original note in the abc_str
-		str_sofar += '-' + note_name + '/' + first_note_r_str;
+		str_sofar += ' -' + note_name + '/' + first_note_r_str;
 		str_to_transform = note_name + '/' + second_note_r_str;
 
 		// Reset stuff
@@ -441,7 +439,7 @@ function add_barlines(abc_str, ts) {
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
 		current_bar += r_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
 		if (current_bar >= ts[0]) {
-			var safe_str = spaces_and_dashes_to_zeroes(abc_str);
+			var safe_str = spaces_and_dashes_to_circles(abc_str);
 			var j = getPosition(safe_str, '0', i + 1); // find the position of the note in the string
 			abc_str = abc_str.substring(0, j) + '|' + abc_str.substring(j, abc_str.length); // add bar line
 			current_bar -= ts[0]; // reset length
@@ -454,18 +452,13 @@ function add_barlines(abc_str, ts) {
 // Returns an updated string with adjusted beams per beat (ex.: "C/4 d/8E/16E/16 C/4").
 function adjust_beams(abc_str) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
-	var safe_str = spaces_and_dashes_to_zeroes(abc_str);
+	var safe_str = spaces_and_dashes_to_circles(abc_str);
 	current_beat = 0;
 	for (var i = 0; i < rhythms.length; i++) {
 		r_length = r_to_length(rhythms[i]); // convert rhythm to make sense with ts den
 		current_beat += r_length;
 		if (current_beat <= 1 && i > 0 && current_beat > r_length) {
-			console.log('i: ' + i);
-			console.log('safe_str: ' + safe_str);
-			console.log('abc_str: ' + abc_str);
 			var j = getPosition(safe_str, '0', i );
-			console.log('current_beat: ' + current_beat);
-			console.log('j: ' + j + '\n\n');
 			abc_str = abc_str.substr(0,j) + '%' + abc_str.substr(j+1,abc_str.length);
 			current_beat -= 1; // reset length
 		};
@@ -577,15 +570,15 @@ function get_nr(option, abc_str, index, ts) {
 // Returns an array with only the rhythm strings from that string (ex.: ['4', '8', '16']).
 function rhythm_from_abc(abc_str) {
 	abc_str = removeTrailingSpace(abc_str);
-	abc_str = spaces_and_dashes_to_zeroes(abc_str);
+	abc_str = spaces_and_dashes_to_circles(abc_str);
 	abc_str = abc_str.replace(/[\D]+/g, ''); // remove non-digits
 	var rhythms_a = abc_str.split('0');
 	return rhythms_a;
 };
 
-function spaces_and_dashes_to_zeroes(str) {
+function spaces_and_dashes_to_circles(str) {
 	str = str.replace(/[ ]+/g, '0'); // replace spaces with 0's
-	str = str.replace(/[-]+/g, '0'); // replace dashes with 0's
+	//str = str.replace(/[-]+/g, '°'); // replace dashes with °'s
 	return str;
 };
 
