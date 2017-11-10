@@ -179,11 +179,22 @@ function length_to_ts(length) {
 // subdivision of it, either ternary or binary
 // when it applies (ex.: [4,4]).
 function divide_ts(ts) {
+	// Avoid weird stuff with the 3/8 escaping below, in case the origin is 3/8 already.
+	if (ts[0] == 3 && ts[1] == 8) {
+		return ts;
+	};
 	var feel = 4
 	if (ts[0] % 4 != 0 && ts[0] % 3 != 0 || ts[0] == ts[1]) {
 		return ts;
 	} else if (ts[0] % 3 == 0) {
 		feel = 3;
+		// Avoid 3/8:
+		if (ts[0] / (ts[0] / feel) == 3) {
+			// Whatever we divided our original num by to get 3
+			// has to be our lowest common denominator that isn't 3
+			var den = ts[0] / 3;
+			return [den, 8];
+		};
 	} else if (ts[0] % 4 == 0) {
 		feel = 4;
 	};
@@ -306,11 +317,11 @@ function input_r_to_n_str(input_r) {
 // Returns a modified string with its intro text (title info etc.).
 function add_intro_to_abc_str(title, bpm, xp_abc, ts) {
 	var abc_intro = "";
-	if (title !== undefined || title === "") {
+	if (title !== undefined && title !== "") {
 		abc_intro += "T: " + title + "\n";
 	};
 	abc_intro += "L: 1\n";
-	if (bpm !== undefined || bpm === "") {
+	if (bpm !== undefined && bpm !== "") {
 		abc_intro += "Q: 1/4=" + bpm + "\n";
 	};
 	abc_intro += "M: " + ts[0] + "/" + ts[1] + "\n";
@@ -414,7 +425,6 @@ function xp_to_abc(xp) {
 // TODO: NOT REQUIRE A MATRIX GENERATED BEFORE STRING WAS FORMATTED (BUG PRONE)
 function line_break_every_n_bars(abc_str, matrix, n) {
 	var indexes = get_each_nth_bars(n, matrix);
-	console.log(abc_str);
 	for (var i = 0; i < indexes.length; i++) {
 		var position = getPosition(abc_str, ' ', indexes[i]);
 		abc_str = abc_str.substr(0, position) + ' \n' + abc_str.substr(position + 1, abc_str.length);
