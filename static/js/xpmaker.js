@@ -212,7 +212,7 @@ function format_abc_str(n_str, ts, n_bars_break) {
 	var abc_str = add_ties(n_str, matrix);
 	abc_str = add_barlines(abc_str, ts);
 	abc_str = line_break_every_n_barlines(abc_str, n_bars_break);
-	abc_str = adjust_beams(abc_str);
+	abc_str = adjust_beams(abc_str, ts);
 	return abc_str;
 };
 
@@ -422,7 +422,7 @@ function line_break_every_n_bars(abc_str, matrix, n) {
 function line_break_every_n_barlines(abc_str, n) {
 	for (var i = n; i < abc_str.replace(/[^|]/g, '').length; i += n) {
 		var position = getPosition(abc_str, '|', i);
-		abc_str = abc_str.substr(0, position + 1) + ' \n' + abc_str.substr(position + 1, abc_str.length);
+		abc_str = abc_str.substr(0, position + 1) + ' \n' + abc_str.substr(position + 2, abc_str.length);
 	};
 	return abc_str;
 };
@@ -468,18 +468,25 @@ function add_barlines(abc_str, ts) {
 
 // Takes an abc-formatted string with no intro text (ex.: "C/4 d/8 E/16 E/16 C/4").
 // Returns an updated string with adjusted beams per beat (ex.: "C/4 d/8E/16E/16 C/4").
-function adjust_beams(abc_str) {
+function adjust_beams(abc_str, ts) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
-	var safe_str = spaces_and_dashes_to_circles(abc_str);
+	var safe_str = abc_str.replace(/[ ]+/g, '0');
+
 	current_beat = 0;
 	for (var i = 0; i < rhythms.length; i++) {
+		console.log(i + ': ' + current_beat);
 		r_length = r_to_length(rhythms[i]); // convert rhythm to make sense with ts den
-		if (current_beat + r_length <= 1 && i > 0) {
-			var j = getPosition(safe_str, '0', i );
-			abc_str = abc_str.substr(0,j) + '%' + abc_str.substr(j+1,abc_str.length);
-			current_beat += r_length;
-		} else {
-			current_beat = 0; // reset length
+		// if the beat isn't complete, tie the beams (beat is complete when number is an integer)
+		if (current_beat % 1 != 0) {
+			if (i > 0) {
+				var j = getPosition(safe_str, '0', i);
+				abc_str = abc_str.substr(0,j) + '%' + abc_str.substr(j+1,abc_str.length);
+			};
+		};
+		current_beat += r_length;
+		// If we reach the end of the bar, reset current_beat
+		if (current_beat >= ts[0] * (4 / ts[1])) {
+			current_beat = 0;
 		};
 	};
 	abc_str = abc_str.replace(/[%]+/g, '');
@@ -591,7 +598,7 @@ function rhythm_from_abc(abc_str) {
 	abc_str = removeTrailingSpace(abc_str);
 	abc_str = spaces_and_dashes_to_circles(abc_str);
 	abc_str = abc_str.replace(/[\D]+/g, ''); // remove non-digits
-	var rhythms_a = abc_str.split('0');
+	var rhythms_a = abc_str.split(/[0]+/g);
 	return rhythms_a;
 };
 
