@@ -1,7 +1,6 @@
 /*
 TODO:
 
-- Function to tie notes that go over barlines
 - Implement localstorage ?
 */
 
@@ -109,7 +108,7 @@ function r_arr_to_length(rhythms_array) {
 	var length = 0;
 	for (var i = 0; i < rhythms_array.length; i++) {
 		r = rhythms_array[i];
-		length += r_str_to_length(r, 4); // TODO: Make it change depending on the time signature
+		length += r_str_to_length(r, 4);
 	};
 	return length;
 };
@@ -208,12 +207,12 @@ function input_r_to_abc_str(input_r, ts, n_bars_break) {
 // Returns a formatted abcjs string complete with barlines and line breaks.
 function format_abc_str(n_str, ts, n_bars_break) {
 	// The order of operations here is crucial!
-	// TODO: make it less so (bug prone)
+	// TODO: check if it actually still is
 	var matrix = abc_str_to_matrix(n_str, ts);
 	var abc_str = add_ties(n_str, matrix);
-	//abc_str = add_barlines(abc_str, ts);
-	//abc_str = line_break_every_n_bars(abc_str, matrix, n_bars_break);
-	//abc_str = adjust_beams(abc_str);
+	abc_str = add_barlines(abc_str, ts);
+	abc_str = line_break_every_n_barlines(abc_str, n_bars_break);
+	abc_str = adjust_beams(abc_str);
 	return abc_str;
 };
 
@@ -241,15 +240,19 @@ function add_ties(n_str, matrix) {
 			current_length = 0;
 		} else if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
 			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length, note_length, available_time);
+			replacement_str = replacement_str.replace(/( -)/g, '0-'); // temporarily remove space between tied notes so as not to confuse things
 			
 			// Insert the new note and rhythm in the string
 			var position = getPosition(n_str, ' ', i);
 			var old_str = note_rhythm_to_abc(note_name, rhythm_str);
-			n_str = n_str.substr(0, position) + replacement_str + n_str.substr(position +1 + old_str.length, n_str.length - 1);
+			n_str = n_str.substr(0, position) + ' ' + replacement_str + ' ' + n_str.substr(position  + old_str.length + 2, n_str.length);
+			n_str = removeTrailingSpace(n_str); // clean up
 		} else { // If not, we look at the next note in the beat
 			current_length += note_length;
 		};
 	};
+
+	n_str = n_str.replace(/0/g, ' '); // revert 0 back to spaces.
 
 	return n_str;
 };
@@ -257,11 +260,12 @@ function add_ties(n_str, matrix) {
 function make_replacement_str(str_sofar, str_to_transform, current_length, note_length, available_time) {
 	// Base case:
 	if (current_length + note_length <= available_time) {
-		str_sofar = str_sofar.replace(/^( -)/, '');
-		return str_sofar + ' -' + str_to_transform;
+		str_sofar = str_sofar.replace(/^(-)/, '');
+		var replacement_str = str_sofar + '-' + str_to_transform;
+		return replacement_str.replace(/-/g, ' -');
 	} else { // Recursive case:
 		// Get note name
-		var note_name = str_to_transform.replace(/[^A-GZ-z]/g, '');
+		var note_name = str_to_transform.replace(/[^A-GZ-z0]/g, '');
 
 		// Get length of the split note
 		var first_note_length = available_time - current_length;
@@ -272,7 +276,7 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 		var second_note_r_str = length_to_r_str(second_note_length, 4);
 		
 		// Create the string that should replace the original note in the abc_str
-		str_sofar += ' -' + note_name + '/' + first_note_r_str;
+		str_sofar += '-' + note_name + '/' + first_note_r_str;
 		str_to_transform = note_name + '/' + second_note_r_str;
 
 		// Reset stuff
@@ -402,9 +406,18 @@ function xp_to_abc(xp) {
 // TODO: NOT REQUIRE A MATRIX GENERATED BEFORE STRING WAS FORMATTED (BUG PRONE)
 function line_break_every_n_bars(abc_str, matrix, n) {
 	var indexes = get_each_nth_bars(n, matrix);
+	console.log(abc_str);
 	for (var i = 0; i < indexes.length; i++) {
 		var position = getPosition(abc_str, ' ', indexes[i]);
 		abc_str = abc_str.substr(0, position) + ' \n' + abc_str.substr(position + 1, abc_str.length);
+	};
+	return abc_str;
+};
+
+function line_break_every_n_barlines(abc_str, n) {
+	for (var i = n; i < abc_str.replace(/[^|]/g, '').length; i += n) {
+		var position = getPosition(abc_str, '|', i);
+		abc_str = abc_str.substr(0, position + 1) + ' \n' + abc_str.substr(position + 1, abc_str.length);
 	};
 	return abc_str;
 };
@@ -437,9 +450,9 @@ function add_barlines(abc_str, ts) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
+		var safe_str = spaces_and_dashes_to_circles(abc_str);
 		current_bar += r_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
 		if (current_bar >= ts[0]) {
-			var safe_str = spaces_and_dashes_to_circles(abc_str);
 			var j = getPosition(safe_str, '0', i + 1); // find the position of the note in the string
 			abc_str = abc_str.substring(0, j) + '|' + abc_str.substring(j, abc_str.length); // add bar line
 			current_bar -= ts[0]; // reset length
@@ -456,11 +469,12 @@ function adjust_beams(abc_str) {
 	current_beat = 0;
 	for (var i = 0; i < rhythms.length; i++) {
 		r_length = r_to_length(rhythms[i]); // convert rhythm to make sense with ts den
-		current_beat += r_length;
-		if (current_beat <= 1 && i > 0 && current_beat > r_length) {
+		if (current_beat + r_length <= 1 && i > 0) {
 			var j = getPosition(safe_str, '0', i );
 			abc_str = abc_str.substr(0,j) + '%' + abc_str.substr(j+1,abc_str.length);
-			current_beat -= 1; // reset length
+			current_beat += r_length;
+		} else {
+			current_beat = 0; // reset length
 		};
 	};
 	abc_str = abc_str.replace(/[%]+/g, '');
