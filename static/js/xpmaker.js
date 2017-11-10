@@ -221,6 +221,7 @@ function format_abc_str(n_str, ts, n_bars_break) {
 // (ex.: 'B/4 B/8 B/16') and a matrix array.
 // Returns an updated string with modified notes to allow them to tie over beats.
 function add_ties(n_str, matrix) {
+	console.log(matrix);
 	var ts = matrix[2];
 	var current_length = 0;
 	for (var i = 0; i < matrix[0].length; i++) {
@@ -229,53 +230,68 @@ function add_ties(n_str, matrix) {
 
 		var note_length = r_to_length(rhythm_str);
 		var available_time = 1;
+
+		console.log("rhythm_str: " + rhythm_str);
+		console.log("current_length: " + current_length);
+		console.log("note_length: " + note_length + '\n\n');
 		/* Temporary replacement for following malfunctioning technique: */
-		if (note_length >= 2 && current_length == 0) break;
-		current_length += note_length;
 		// If we're somewhere within the first, third or fifth beat (etc.),
 		// the note cannot be longer that 2 beats (eases reading).
 		/*if (matrix[4][i] % 2 == 1) {
 			available_time = 2;
 		};*/
-		// Reset if we've hit the available time.
-		if (current_length == 1) {
+		if (note_length >= 2 && current_length == 0) {
+		} else if (current_length + note_length == 1) { // Reset if we've hit the available time.
+			console.log('reset current_length\n\n');
 			current_length = 0;
-		};
-		// If we go beyond the available time, we split the note.
-		var replacement_str = '(';
-		var modified = false;
-		// GO RECURSIVE!!! REPLACEMENT_STR'S SECOND HALF SHOULD BE THE FIRST OF THE NEXT RECURSION.
-		while (current_length > available_time) {
-			modified = true;
-			// Get length of the split note
-			var first_note_length = available_time - current_length + note_length;
-			var second_note_length = note_length - first_note_length;
-			console.log("first note length: " + first_note_length);
-
-			// Translate into a rhythm string
-			var first_note_r_str = length_to_r_str(first_note_length, 4);
-			var second_note_r_str = length_to_r_str(second_note_length, 4);
+		} else if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
+			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length, note_length, available_time);
 			
-			// Create the string that should replace the original note in the abc_str
-			replacement_str += note_name + '/' + first_note_r_str;
-			replacement_str += '0' + note_name + '/' + second_note_r_str;
-
-			// Reset current_length (the next beat starts with the second note's length)
-			current_length = second_note_length;
-			available_time = 1;
-		};
-		replacement_str += ')';
-		if (modified === true) {
 			// Insert the new note and rhythm in the string
 			var position = getPosition(n_str, ' ', i);
 			var old_str = note_rhythm_to_abc(note_name, rhythm_str);
 			n_str = n_str.substr(0, position +1) + replacement_str + n_str.substr(position +1 + old_str.length, n_str.length);
+		} else { // If not, we look at the next note in the beat
+			current_length += note_length;
 		};
 	};
 
 	n_str = n_str.replace(/[0]+/g, ' ');
 
 	return n_str;
+};
+
+function make_replacement_str(str_sofar, str_to_transform, current_length, note_length, available_time) {
+	// Base case:
+	if (current_length + note_length <= available_time) {
+		console.log('base case');
+		return "(" + str_sofar + '0' + str_to_transform + ")";
+	} else { // Recursive case:
+		// Get note name
+		var note_name = str_to_transform.replace(/[^A-GZ-z]/g, '');
+
+		// Get length of the split note
+		var first_note_length = available_time - current_length;
+		var second_note_length = note_length - first_note_length;
+		console.log("first note length: " + first_note_length);
+
+		// Translate into a rhythm string
+		var first_note_r_str = length_to_r_str(first_note_length, 4);
+		var second_note_r_str = length_to_r_str(second_note_length, 4);
+		
+		// Create the string that should replace the original note in the abc_str
+		str_sofar += note_name + '/' + first_note_r_str;
+		str_to_transform = note_name + '/' + second_note_r_str;
+
+		console.log('str_sofar: ' + str_sofar);
+		console.log('str_to_transform: ' + str_to_transform);
+
+		// Reset stuff
+		current_length = 0;
+		available_time = 1;
+
+		return make_replacement_str(str_sofar, str_to_transform, current_length, second_note_length, available_time);
+	};
 };
 
 // Takes an input rhythm string (ex.: '4 8 16').
