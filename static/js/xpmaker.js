@@ -221,7 +221,6 @@ function format_abc_str(n_str, ts, n_bars_break) {
 // (ex.: 'B/4 B/8 B/16') and a matrix array.
 // Returns an updated string with modified notes to allow them to tie over beats.
 function add_ties(n_str, matrix) {
-	console.log(matrix);
 	var ts = matrix[2];
 	var current_length = 0;
 	for (var i = 0; i < matrix[0].length; i++) {
@@ -231,9 +230,6 @@ function add_ties(n_str, matrix) {
 		var note_length = r_to_length(rhythm_str);
 		var available_time = 1;
 
-		console.log("rhythm_str: " + rhythm_str);
-		console.log("current_length: " + current_length);
-		console.log("note_length: " + note_length + '\n\n');
 		/* Temporary replacement for following malfunctioning technique: */
 		// If we're somewhere within the first, third or fifth beat (etc.),
 		// the note cannot be longer that 2 beats (eases reading).
@@ -242,7 +238,6 @@ function add_ties(n_str, matrix) {
 		};*/
 		if (note_length >= 2 && current_length == 0) {
 		} else if (current_length + note_length == 1) { // Reset if we've hit the available time.
-			console.log('reset current_length\n\n');
 			current_length = 0;
 		} else if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
 			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length, note_length, available_time);
@@ -264,7 +259,6 @@ function add_ties(n_str, matrix) {
 function make_replacement_str(str_sofar, str_to_transform, current_length, note_length, available_time) {
 	// Base case:
 	if (current_length + note_length <= available_time) {
-		console.log('base case');
 		str_sofar = str_sofar.substr(1, str_sofar.length-1);
 		return str_sofar + '-' + str_to_transform;
 	} else { // Recursive case:
@@ -274,7 +268,6 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 		// Get length of the split note
 		var first_note_length = available_time - current_length;
 		var second_note_length = note_length - first_note_length;
-		console.log("first note length: " + first_note_length);
 
 		// Translate into a rhythm string
 		var first_note_r_str = length_to_r_str(first_note_length, 4);
@@ -283,9 +276,6 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 		// Create the string that should replace the original note in the abc_str
 		str_sofar += '-' + note_name + '/' + first_note_r_str;
 		str_to_transform = note_name + '/' + second_note_r_str;
-
-		console.log('str_sofar: ' + str_sofar);
-		console.log('str_to_transform: ' + str_to_transform);
 
 		// Reset stuff
 		current_length = 0;
@@ -449,11 +439,17 @@ function add_barlines(abc_str, ts) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
-		current_bar +=  r_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
+		current_bar += r_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
+		console.log(current_bar);
 		if (current_bar >= ts[0]) {
-			var j = getPosition(abc_str, ' ', i+1); // find the position of the note in the string
+			var safe_str = spaces_and_dashes_to_zeroes(abc_str);
+			console.log('safe_str: ' + safe_str);
+			var j = getPosition(safe_str, '0', i + 1); // find the position of the note in the string
+			console.log('i: ' + i);
+			console.log('j: ' + j);
 			abc_str = abc_str.substring(0, j) + '|' + abc_str.substring(j, abc_str.length); // add bar line
 			current_bar -= ts[0]; // reset length
+			console.log('reset: ' + current_bar);
 		};
 	};
 	return abc_str;
@@ -585,10 +581,16 @@ function get_nr(option, abc_str, index, ts) {
 // Returns an array with only the rhythm strings from that string (ex.: ['4', '8', '16']).
 function rhythm_from_abc(abc_str) {
 	abc_str = removeTrailingSpace(abc_str);
-	abc_str = abc_str.replace(/[ ]+/g, '0'); // replace spaces with 0's
+	abc_str = spaces_and_dashes_to_zeroes(abc_str);
 	abc_str = abc_str.replace(/[\D]+/g, ''); // remove non-digits
 	var rhythms_a = abc_str.split('0');
 	return rhythms_a;
+};
+
+function spaces_and_dashes_to_zeroes(str) {
+	str = str.replace(/[ ]+/g, '0'); // replace spaces with 0's
+	str = str.replace(/[-]+/g, '0'); // replace dashes with 0's
+	return str;
 };
 
 // Takes an abc-formatted string with no intro text (ex.: "C/4 d/8 E/16").
