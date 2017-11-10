@@ -1,7 +1,8 @@
 /*
 TODO:
 
-- Implement localstorage ?
+- Clean up a little
+- Add support for dotted notes and tuplets
 */
 
 // USER INPUT TRANSFORMATION //
@@ -41,7 +42,9 @@ function updateXP(notes_str, rhythms_str, title, bpm, out_id) {
 	var ts = r_to_ts(rhythms_a);
 	
 	// Format the loop
-	xp_abc = format_abc_str(xp_abc, ts, 4);
+	var bars_to_break = 4;
+	if (ts[0] >= 13) bars_to_break = 2;
+	xp_abc = format_abc_str(xp_abc, ts, bars_to_break);
 	xp_abc = add_intro_to_abc_str(title, bpm, xp_abc, ts);
 
 	// Update loop textarea
@@ -308,7 +311,7 @@ function add_intro_to_abc_str(title, bpm, xp_abc, ts) {
 	};
 	abc_intro += "L: 1\n";
 	if (bpm !== undefined || bpm === "") {
-		abc_intro += "Q: " + bpm + "\n";
+		abc_intro += "Q: 1/4=" + bpm + "\n";
 	};
 	abc_intro += "M: " + ts[0] + "/" + ts[1] + "\n";
 
