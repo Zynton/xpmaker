@@ -474,7 +474,6 @@ function adjust_beams(abc_str, ts) {
 
 	current_beat = 0;
 	for (var i = 0; i < rhythms.length; i++) {
-		console.log(i + ': ' + current_beat);
 		r_length = r_to_length(rhythms[i]); // convert rhythm to make sense with ts den
 		// if the beat isn't complete, tie the beams (beat is complete when number is an integer)
 		if (current_beat % 1 != 0) {
