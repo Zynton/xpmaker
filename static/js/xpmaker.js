@@ -197,27 +197,28 @@ function length_to_ts(length) {
 // subdivision of it, either ternary or binary
 // when it applies (ex.: [4,4]).
 function divide_ts(ts) {
-	console.log(ts);
-	// Avoid weird stuff with the 3/8 escaping below, in case the origin is 3/8 already.
-	if (ts[0] == 3 && ts[1] == 8) {
-		return ts;
-	};
 	var feel = 4
 	if (ts[0] % 4 != 0 && ts[0] % 3 != 0 || ts[0] == ts[1]) {
 		return ts;
 	} else if (ts[0] % 3 == 0) {
 		feel = 3;
-		// Avoid 3/8:
-		if (ts[0] / (ts[0] / feel) == 3) {
-			// Whatever we divided our original num by to get 3
-			// has to be our lowest common denominator that isn't 3
-			var den = ts[0] / 3;
-			return [den, 8];
-		};
 	} else if (ts[0] % 4 == 0) {
 		feel = 4;
 	};
+
 	var num = ts[0] / (ts[0] / feel);
+	
+	// Avoid 3/8, 2/8, 1/8:
+	if (num <= 3 && ts[1] == 8) {
+		// Avoid weird stuff with the 3/8 and 2/8 escaping below, in case the origin is 3/8 already.
+		if (ts[0] <= 3 && ts[1] == 8) { // TODO: replace with if (ts[0] == num) ?
+			return ts;
+		};
+		// Whatever we divided our original num by to get 3 or 2
+		// has to be our lowest common denominator that isn't 3 or 2
+		num = ts[0] / num;
+	};
+
 	var new_ts = [num, ts[1]];
 	return new_ts;
 };
