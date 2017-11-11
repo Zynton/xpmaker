@@ -55,6 +55,22 @@ function updateXP(notes_str, rhythms_str, title, bpm, out_id) {
 	var xp_editor = update_editor(out_id, "xp_canvas", "xp_midi", "xp_midi_dl", 650);
 };
 
+function remove_wrong_rhythms(r_arr) {
+	var l = r_arr.length;
+	for (var i = 0; i < l; i++) {
+		var r_int = parseInt(r_arr[i]);
+		console.log(r_int);
+		// If the rhythm is not a number or if it's not a power of 2, remove it.
+		if (r_int === undefined || Math.log2(r_int) % 1 != 0) {
+			console.log('ok');
+			r_arr.splice(i, 1);
+			i -= 1; // The next index on the array is now i.
+			l = r_arr.length;
+		};
+	};
+	return r_arr;
+};
+
 // Takes the user's raw notes input and the hidden output textarea id string
 // (ex.: 'notes_output') that will be read by abcjs to generate the canvas.
 // Updates the hidden notes input textarea and its corresponding canvas.
@@ -81,6 +97,8 @@ function updateRhythms(rhythms_str, out_id) {
 	// Make array of rhythms out of input
 	rhythms_str = clean_input_str(rhythms_str);
 	var rhythms_a = rhythms_str.split(' ');
+	rhythms_a = remove_wrong_rhythms(rhythms_a);
+	rhythms_str = rhythms_a.join(' ');
 
 	// Generate the abc string
 	var ts = r_to_ts(rhythms_a);
@@ -179,6 +197,7 @@ function length_to_ts(length) {
 // subdivision of it, either ternary or binary
 // when it applies (ex.: [4,4]).
 function divide_ts(ts) {
+	console.log(ts);
 	// Avoid weird stuff with the 3/8 escaping below, in case the origin is 3/8 already.
 	if (ts[0] == 3 && ts[1] == 8) {
 		return ts;
