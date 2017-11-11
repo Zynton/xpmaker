@@ -59,10 +59,8 @@ function remove_wrong_rhythms(r_arr) {
 	var l = r_arr.length;
 	for (var i = 0; i < l; i++) {
 		var r_int = parseInt(r_arr[i]);
-		console.log(r_int);
 		// If the rhythm is not a number or if it's not a power of 2, remove it.
 		if (r_int === undefined || Math.log2(r_int) % 1 != 0) {
-			console.log('ok');
 			r_arr.splice(i, 1);
 			i -= 1; // The next index on the array is now i.
 			l = r_arr.length;
@@ -207,7 +205,7 @@ function divide_ts(ts) {
 	};
 
 	var num = ts[0] / (ts[0] / feel);
-	
+
 	// Avoid 3/8, 2/8, 1/8:
 	if (num <= 3 && ts[1] == 8) {
 		// Avoid weird stuff with the 3/8 and 2/8 escaping below, in case the origin is 3/8 already.
@@ -242,6 +240,11 @@ function input_r_to_abc_str(input_r, ts, n_bars_break) {
 function format_abc_str(n_str, ts, n_bars_break) {
 	// The order of operations here is crucial!
 	// TODO: check if it actually still is
+
+	// if time signature is not valid, return an empty string
+	if (ts[0] === NaN) {
+		return '';
+	};
 	var matrix = abc_str_to_matrix(n_str, ts);
 	var abc_str = add_ties(n_str, matrix);
 	abc_str = add_barlines(abc_str, ts);
@@ -255,6 +258,8 @@ function format_abc_str(n_str, ts, n_bars_break) {
 // Returns an updated string with modified notes to allow them to tie over beats.
 function add_ties(n_str, matrix) {
 	var current_length = 0;
+	var ts = matrix[2];
+	var bar_length = ts[0] * (4 / ts[1]);
 	for (var i = 0; i < matrix[0].length; i++) {
 		var note_name = matrix[0][i];
 		var rhythm_str = matrix[1][i];
@@ -263,6 +268,7 @@ function add_ties(n_str, matrix) {
 		var available_time = 1;
 
 		if (matrix[4][i] == 1) current_length = 0;
+		console.log('current_length: ' + current_length);
 
 		/* Temporary replacement for following malfunctioning technique: */
 		// If we're somewhere within the first, third or fifth beat (etc.),
@@ -270,11 +276,28 @@ function add_ties(n_str, matrix) {
 		/*if (matrix[4][i] % 2 == 1) {
 			available_time = 2;
 		};*/
+		// if the note is on the first beat and it's not longer
+		// than the bar, then let it be.
 		if (note_length >= 2 && current_length == 0) {
-		} else if (current_length + note_length == available_time) { // Reset if we've hit the available time.
+			console.log('note_length: ' + note_length);
+			console.log('bar_length: ' + bar_length);
+			if (bar_length >= note_length) {
+				console.log('ok');
+				available_time = note_length;
+			} else {
+				if (Math.ceil(bar_length) % 2 == 0) {
+					available_time = Math.floor(bar_length);
+				} else {
+					available_time = Math.floor(bar_length) - 1;
+				};
+			};
+			console.log('available_time: ' + available_time);
+			console.log('');
+		};
+		if (current_length + note_length == available_time) { // Reset if we've hit the available time.
 			current_length = 0;
 		} else if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
-			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length, note_length, available_time);
+			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length % 1, note_length, available_time);
 			replacement_str = replacement_str.replace(/( -)/g, '0-'); // temporarily remove space between tied notes so as not to confuse things
 			
 			// Insert the new note and rhythm in the string
@@ -298,21 +321,34 @@ function add_ties(n_str, matrix) {
 
 function make_replacement_str(str_sofar, str_to_transform, current_length, note_length, available_time) {
 	// Base case:
-	if (current_length + note_length <= available_time) {
+	if (current_length + note_length <= available_time || note_length == 0) {
 		str_sofar = str_sofar.replace(/^(-)/, '');
 		var replacement_str = str_sofar + '-' + str_to_transform;
 		return replacement_str.replace(/-/g, ' -');
 	} else { // Recursive case:
+		console.log('str_sofar: ' + str_sofar);
+		console.log('str_to_transform: ' + str_to_transform);
+		console.log('current_length: ' + current_length);
+		console.log('note_length: ' + note_length);
+		console.log('available_time: ' + available_time);
+
 		// Get note name
 		var note_name = str_to_transform.replace(/[^A-GZ-z0]/g, '');
+		console.log('note_name: ' + note_name);
 
 		// Get length of the split note
 		var first_note_length = available_time - current_length;
 		var second_note_length = note_length - first_note_length;
 
+		console.log('first_note_length: ' + first_note_length);
+		console.log('second_note_length: ' + second_note_length);
+
 		// Translate into a rhythm string
 		var first_note_r_str = length_to_r_str(first_note_length, 4);
 		var second_note_r_str = length_to_r_str(second_note_length, 4);
+		console.log('first_note_r_str: ' + first_note_r_str);
+		console.log('second_note_r_str: ' + second_note_r_str);
+		console.log(' ');
 		
 		// Create the string that should replace the original note in the abc_str
 		str_sofar += '-' + note_name + '/' + first_note_r_str;
