@@ -257,23 +257,31 @@ function format_abc_str(n_str, ts, n_bars_break) {
 // (ex.: 'B/4 B/8 B/16') and a matrix array.
 // Returns an updated string with modified notes to allow them to tie over beats.
 function add_ties(n_str, matrix) {
+	console.log('n_str coming in: ' + n_str + '\n\n%%%\n\n')
 	var current_length = 0;
 	var ts = matrix[2];
 	var bar_length = ts[0] * (4 / ts[1]);
+	console.log('NEW TIES');
 	for (var i = 0; i < matrix[0].length; i++) {
 		n_str = n_str.replace(/[ ]+/g, ' '); // clean up: no multiple spaces
 		var note_name = matrix[0][i];
 		var rhythm_str = matrix[1][i];
 
 		var note_length = r_to_length(rhythm_str);
+		console.log('note_length: ' + note_length);
 		var available_time = 1;
 
+		current_length = ((matrix[4][i] - 1) * (4 / ts[1])) % 1;
+		console.log(matrix[4]);
+		console.log('current_length: ' + current_length);
 		// If we're somewhere within the first, third or fifth beat (etc.),
 		// the note can be longer that 1 beat (eases reading).
 		// If the note is on the first beat and it's not longer
 		// than the bar, then let it be.
 		if (note_length >= 2 && matrix[4][i] == 1) {
+			console.log('bar_length: ' + bar_length);
 			if (bar_length >= note_length) {
+				console.log('ok');
 				available_time = note_length;
 			} else { // if it IS longer than the bar, limit to the closest lower pair number
 				if (Math.ceil(bar_length) % 2 == 0) {
@@ -282,10 +290,11 @@ function add_ties(n_str, matrix) {
 					available_time = Math.floor(bar_length) - 1;
 				};
 			};
+			console.log('available_time: ' + available_time);
 		};
-		
+		console.log('');
 		if (current_length + note_length == available_time) { // Reset if we've hit the available time.
-			current_length = 0;
+			//current_length = 0;
 		} else if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
 			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length % 1, note_length, available_time);
 			replacement_str = replacement_str.replace(/(- )/g, '-0'); // temporarily remove space between tied notes so as not to confuse things
@@ -293,16 +302,28 @@ function add_ties(n_str, matrix) {
 			// Insert the new note and rhythm in the string
 			var position = getPosition(n_str, ' ', i);
 			var old_str = note_rhythm_to_abc(note_name, rhythm_str);
+			console.log('n_str: _' + n_str + '_');
+			console.log('part 1: _' + n_str.substr(0, position) + '_');
+			console.log('replacement: _' + replacement_str + '_');
+			console.log('part 2: _' + n_str.substr(position + old_str.length + 1, n_str.length) + '_');
 			n_str = n_str.substr(0, position) + ' ' + replacement_str + ' ' + n_str.substr(position + old_str.length + 1, n_str.length);
 			n_str = removeTrailingSpace(n_str); // clean up
+
 			
-			current_length = 0;
+			//current_length = 0;
+			// Get the last tied note's length and set the current length to that.
+			//var last_note_length = r_to_length(replacement_str.substr(replacement_str.length-1, replacement_str.length-1));
+			//current_length = last_note_length;
 		} else { // If not, we look at the next note in the beat
-			current_length += note_length;
+			//current_length += note_length;
 		};
+
+		console.log('n_str so far: ' + n_str);
+		console.log('===');
 	};
 
 	n_str = n_str.replace(/0/g, ' '); // revert 0 back to spaces.
+	console.log('\nn_str = ' + n_str + '\n\n=====\n\n');
 
 	return n_str;
 };
@@ -312,19 +333,32 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 	if (current_length + note_length <= available_time || note_length == 0) {
 		str_sofar = str_sofar.replace(/^(-)/, '');
 		var replacement_str = str_sofar + '-' + str_to_transform;
+		console.log('final string: ' + replacement_str.replace(/-/g, '- '));
 		return replacement_str.replace(/-/g, '- ');
 	} else { // Recursive case:
+		console.log('str_sofar: ' + str_sofar);
+		console.log('str_to_transform: ' + str_to_transform);
+		console.log('current_length: ' + current_length);
+		console.log('note_length: ' + note_length);
+		console.log('available_time: ' + available_time);
 
 		// Get note name
 		var note_name = str_to_transform.replace(/[^A-GZ-z0]/g, '');
+		console.log('note_name: ' + note_name);
 
 		// Get length of the split note
 		var first_note_length = available_time - current_length;
 		var second_note_length = note_length - first_note_length;
 
+		console.log('first_note_length: ' + first_note_length);
+		console.log('second_note_length: ' + second_note_length);
+
 		// Translate into a rhythm string
 		var first_note_r_str = length_to_r_str(first_note_length, 4);
 		var second_note_r_str = length_to_r_str(second_note_length, 4);
+		console.log('first_note_r_str: ' + first_note_r_str);
+		console.log('second_note_r_str: ' + second_note_r_str);
+		console.log('---');
 		
 		// Create the string that should replace the original note in the abc_str
 		str_sofar += '-' + note_name + '/' + first_note_r_str;
@@ -415,6 +449,8 @@ function make_xp_abc(notes_a, rhythms_a) {
 // The notes and rhythms are distributed to each other.
 // (ex.: [ ['C', '4'], ['d', '8'], ['C', '16'], ['d', '4'], ['C', '8'], ['d', '16'] ]).
 function xp_mix_and_match(notes_a, rhythms_a) {
+	console.log('notes_a: ' + notes_a);
+	console.log('rhythms_a: ' + rhythms_a);
 	var note = [notes_a[0], rhythms_a[0]];
 	var xp = [note];
 	var notes_i = 0;
@@ -697,14 +733,20 @@ function update_editor(textarea_id, canvas_id, midi_id, midi_dl_id, width) {
 // Returns the render_options for the canvas to scale.
 function get_canvas_dim(canvas_id, width) {
 	var w = $('.collapsible').width();
+	//var e = $('#' + canvas_id).width();
 	var e = sw/4;
+	//console.log("w = " + w);
+	//console.log("e = " + e);
 	var sw = width;
 	var scale = 1.0;
 	
 	var arealeft = w - e;
+	//console.log("arealeft = " + arealeft);
 	if (arealeft < (sw + (sw/3))) {
 		scale = scale * (arealeft - 50)/ sw;
 		sw = arealeft - 50;			
+		//console.log("scale = " + scale);
+		//console.log("sw = " + sw);
 	};
 
 	$('#paperid').width = sw;
