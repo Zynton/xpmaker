@@ -1,7 +1,6 @@
 /*
 TODO:
 
-- Clean up a little
 - Add support for dotted notes and tuplets
 */
 
@@ -299,7 +298,7 @@ function add_ties(n_str, matrix) {
 		};
 		if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
 			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length % 1, note_length, available_time);
-			replacement_str = replacement_str.replace(/(- )/g, '-0'); // temporarily remove space between tied notes so as not to confuse things
+			replacement_str = replacement_str.replace(/(- )/g, '-`'); // temporarily remove space between tied notes so as not to confuse things
 			
 			// Insert the new note and rhythm in the string
 			var position = getPosition(n_str, ' ', i);
@@ -309,7 +308,7 @@ function add_ties(n_str, matrix) {
 		};
 	};
 
-	n_str = n_str.replace(/0/g, ' '); // revert 0 back to spaces.
+	n_str = n_str.replace(/`/g, ' '); // revert ` back to spaces.
 
 	return n_str;
 };
@@ -331,7 +330,7 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 		return replacement_str.replace(/-/g, '- ');
 	} else { // Recursive case:
 		// Get note name
-		var note_name = str_to_transform.replace(/[^A-GZ-z0]/g, '');
+		var note_name = str_to_transform.replace(/[^A-GZ-z`]/g, '');
 
 		// Get length of the split note
 		var first_note_length = available_time - current_length;
@@ -499,10 +498,10 @@ function line_break_every_n_notes(notes_str, n) {
 
 		for (var i = n; i < notes_a.length; i += n) {
 			var position = getPosition(notes_str, ' ', i);
-			new_str = new_str.substr(0, position) + '0' + new_str.substr(position + 1, new_str.length);
+			new_str = new_str.substr(0, position) + '`' + new_str.substr(position + 1, new_str.length);
 		};
 
-		notes_str = new_str.replace(/[0]+/g, '\n');
+		notes_str = new_str.replace(/[`]+/g, '\n');
 	};
 
 	return notes_str;
@@ -515,10 +514,10 @@ function add_barlines(abc_str, ts) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
 	current_bar = 0;
 	for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
-		var safe_str = spaces_and_dashes_to_circles(abc_str);
+		var safe_str = escape_spaces(abc_str);
 		current_bar += r_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
 		if (current_bar >= ts[0]) {
-			var j = getPosition(safe_str, '0', i + 1); // find the position of the note in the string
+			var j = getPosition(safe_str, '`', i + 1); // find the position of the note in the string
 			abc_str = abc_str.substring(0, j) + '|' + abc_str.substring(j, abc_str.length); // add bar line
 			current_bar -= ts[0]; // reset length
 		};
@@ -530,7 +529,7 @@ function add_barlines(abc_str, ts) {
 // Returns an updated string with adjusted beams per beat (ex.: "C/4 d/8E/16E/16 C/4").
 function adjust_beams(abc_str, ts) {
 	var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
-	var safe_str = abc_str.replace(/[ ]+/g, '0');
+	var safe_str = abc_str.replace(/[ ]+/g, '`');
 
 	current_beat = 0;
 	for (var i = 0; i < rhythms.length; i++) {
@@ -538,7 +537,7 @@ function adjust_beams(abc_str, ts) {
 		// if the beat isn't complete, tie the beams (beat is complete when number is an integer)
 		if (current_beat % 1 != 0) {
 			if (i > 0) {
-				var j = getPosition(safe_str, '0', i);
+				var j = getPosition(safe_str, '`', i);
 				abc_str = abc_str.substr(0,j) + '%' + abc_str.substr(j+1,abc_str.length);
 			};
 		};
@@ -655,15 +654,14 @@ function get_nr(option, abc_str, index, ts) {
 // Returns an array with only the rhythm strings from that string (ex.: ['4', '8', '16']).
 function rhythm_from_abc(abc_str) {
 	abc_str = removeTrailingSpace(abc_str);
-	abc_str = spaces_and_dashes_to_circles(abc_str);
-	abc_str = abc_str.replace(/[\D]+/g, ''); // remove non-digits
-	var rhythms_a = abc_str.split(/[0]+/g);
+	abc_str = escape_spaces(abc_str);
+	abc_str = abc_str.replace(/[^\d]+/g, ''); // remove everything but digits and '`' signs.
+	var rhythms_a = abc_str.split(/[`]+/g);
 	return rhythms_a;
 };
 
-function spaces_and_dashes_to_circles(str) {
-	str = str.replace(/[ ]+/g, '0'); // replace spaces with 0's
-	//str = str.replace(/[-]+/g, '°'); // replace dashes with °'s
+function escape_spaces(str) {
+	str = str.replace(/[ ]+/g, '`'); // replace spaces with `'s
 	return str;
 };
 
@@ -671,15 +669,15 @@ function spaces_and_dashes_to_circles(str) {
 // Returns an array with only the note strings from that string (ex.: ['C', 'd', 'E']).
 function notes_from_abc(abc_str) {
 	abc_str = removeTrailingSpace(abc_str); // clean up
-	abc_str = abc_str.replace(/[^A-GZ-z]+/g, '0'); // remove non-notes
-	if (abc_str[0] == '0') {
+	abc_str = abc_str.replace(/[^A-GZ-z]+/g, '`'); // remove non-notes
+	if (abc_str[0] == '`') {
 		abc_str = abc_str.substr(1, abc_str.length);
 	};
 	// clean up
 	if (abc_str[abc_str.length-1] == '0') {
 		abc_str = abc_str.substr(0, abc_str.length-1);
 	};
-	var notes_a = abc_str.split('0');
+	var notes_a = abc_str.split('`');
 	return notes_a;
 };
 
