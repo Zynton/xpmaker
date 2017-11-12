@@ -297,7 +297,7 @@ function add_ties(n_str, matrix) {
 			current_length = 0;
 		} else if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
 			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length % 1, note_length, available_time);
-			replacement_str = replacement_str.replace(/( -)/g, '0-'); // temporarily remove space between tied notes so as not to confuse things
+			replacement_str = replacement_str.replace(/(- )/g, '-0'); // temporarily remove space between tied notes so as not to confuse things
 			
 			// Insert the new note and rhythm in the string
 			var position = getPosition(n_str, ' ', i);
@@ -333,8 +333,8 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 	if (current_length + note_length <= available_time || note_length == 0) {
 		str_sofar = str_sofar.replace(/^(-)/, '');
 		var replacement_str = str_sofar + '-' + str_to_transform;
-		console.log('final string: ' + replacement_str.replace(/-/g, ' -'));
-		return replacement_str.replace(/-/g, ' -');
+		console.log('final string: ' + replacement_str.replace(/-/g, '- '));
+		return replacement_str.replace(/-/g, '- ');
 	} else { // Recursive case:
 		console.log('str_sofar: ' + str_sofar);
 		console.log('str_to_transform: ' + str_to_transform);
