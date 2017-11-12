@@ -655,7 +655,7 @@ function get_nr(option, abc_str, index, ts) {
 function rhythm_from_abc(abc_str) {
 	abc_str = removeTrailingSpace(abc_str);
 	abc_str = escape_spaces(abc_str);
-	abc_str = abc_str.replace(/[^\d]+/g, ''); // remove everything but digits and '`' signs.
+	abc_str = abc_str.replace(/[^\d`]+/g, ''); // remove everything but digits and '`' signs.
 	var rhythms_a = abc_str.split(/[`]+/g);
 	return rhythms_a;
 };
