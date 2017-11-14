@@ -103,9 +103,9 @@ function updateRhythms(rhythms_str, out_id) {
 function remove_wrong_rhythms(r_arr) {
 	var l = r_arr.length;
 	for (var i = 0; i < l; i++) {
-		var r_int = parseInt(r_arr[i]);
-		// If the rhythm is not a number, remove it.
-		if (r_int === undefined) {
+		// If the rhythm is not an integer, remove it.
+		if (r_arr[i].match(/\d/)) {	
+		} else {
 			r_arr.splice(i, 1);
 			i -= 1; // The next index on the array is now i.
 			l = r_arr.length;
