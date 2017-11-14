@@ -15,7 +15,7 @@ function updateFields(currentField) {
 	var rhythms_str = $('#rhythms_input').val();
 	var title = $('#title_input').val();// || "XP";
 	var bpm = $('#bpm_input').val();// || "100";
-	//updateXP(notes_str, rhythms_str, title, bpm, "xp_input");
+	updateXP(notes_str, rhythms_str, title, bpm, "xp_input");
 
 	if (currentField == "notes") {
 		updateNotes(notes_str, 'notes_translated');
