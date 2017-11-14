@@ -1,7 +1,8 @@
 /*
 TODO:
 
-- Add support for dotted notes and tuplets
+- Add support for tuplets
+- Add support for b and # and 4. instead of _ and ^ and 3 on user input
 */
 
 // USER INPUT TRANSFORMATION //
