@@ -15,7 +15,7 @@ function updateFields(currentField) {
 	var rhythms_str = $('#rhythms_input').val();
 	var title = $('#title_input').val();// || "XP";
 	var bpm = $('#bpm_input').val();// || "100";
-	updateXP(notes_str, rhythms_str, title, bpm, "xp_input");
+	//updateXP(notes_str, rhythms_str, title, bpm, "xp_input");
 
 	if (currentField == "notes") {
 		updateNotes(notes_str, 'notes_translated');
@@ -160,6 +160,10 @@ function r_to_length(rhythm, ts_den) {
 function r_str_to_length(rhythm_str, ts_den) {
 	tuplet_re = /.*:(\d+)$/;
 
+	if (rhythm_str == '0') {
+		return 0;
+	}
+
 	// Test if dotted note
 	// If so, rhythm_value is the nearest higher integer
 	// that is a power of two and the length is
@@ -274,7 +278,6 @@ function format_abc_str(n_str, ts, n_bars_break) {
 		return '';
 	};
 	var matrix = abc_str_to_matrix(n_str, ts);
-	console.log('n_str: ' + n_str);
 	var abc_str = add_ties(n_str, matrix);
 	abc_str = add_barlines(abc_str, ts);
 	abc_str = line_break_every_n_barlines(abc_str, n_bars_break);
@@ -289,6 +292,7 @@ function add_ties(n_str, matrix) {
 	var current_length = 0;
 	var ts = matrix[2];
 	var bar_length = ts[0] * (4 / ts[1]);
+
 	for (var i = 0; i < matrix[1].length; i++) {
 		n_str = n_str.replace(/[ ]+/g, ' '); // clean up: no multiple spaces
 		var note_name = matrix[0][i];
@@ -305,11 +309,19 @@ function add_ties(n_str, matrix) {
 		// % 1: we're only interested in the place *within* the beat, not the number of the beat
 		// so we need only take the decimal place.
 		current_length = ((matrix[4][i] - 1) * (4 / ts[1])) % 1;
-		// If we're somewhere within the first, third or fifth beat (etc.),
+
+		// Get how much length is still available in the bar for the note to unfold.
+		// It's the amount of 'beats' (8ths or 4ths, whatever) minus the number of
+		// beats passed, adjusted to the qn via ts[1].
+		var left_in_bar = (ts[0] - (matrix[4][i] - 1)) * (4 / ts[1]);
+
+		// TODO: Clean up where possible.
+		// TODO: If we're somewhere within the first, third or fifth beat (etc.),
 		// the note can be longer that 1 beat (eases reading).
+
 		// If the note is on the first beat and it's not longer
 		// than the bar, then let it be.
-		if (note_length >= 2 && matrix[4][i] == 1) {
+		if (note_length > 1 && matrix[4][i] == 1) {
 			if (bar_length >= note_length) {
 				available_time = note_length;
 			} else { // if it IS longer than the bar, limit to the closest lower pair number
@@ -319,6 +331,9 @@ function add_ties(n_str, matrix) {
 					available_time = Math.floor(bar_length) - 1;
 				};
 			};
+		};
+		if (note_length > left_in_bar) {
+			available_time = left_in_bar;
 		};
 		if (current_length + note_length > available_time) { // If we go beyond the available time, we split the note.
 			var replacement_str = make_replacement_str('', note_name + '/' + rhythm_str, current_length % 1, note_length, available_time);
@@ -351,8 +366,6 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 	if (current_length + note_length <= available_time || note_length == 0) {
 		str_sofar = str_sofar.replace(/^(-)/, '');
 		var replacement_str = str_sofar + '-' + str_to_transform;
-		console.log('replacement_str: ' + replacement_str);
-		console.log('---');
 		return replacement_str.replace(/-/g, '- ');
 	} else { // Recursive case:
 		// Get note name
@@ -369,10 +382,6 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 		// Create the string that should replace the original note in the abc_str
 		str_sofar += '-' + note_name + '/' + first_note_r_str;
 		str_to_transform = note_name + '/' + second_note_r_str;
-		console.log('str_sofar: ' + str_sofar);
-		console.log('str_to_transform: ' + str_to_transform);
-		console.log('first_note_length: ' + first_note_length);
-		console.log('second_note_length: ' + second_note_length);
 
 		// Reset stuff
 		current_length = 0;
