@@ -7,6 +7,18 @@ TODO:
 // USER INPUT TRANSFORMATION //
 // ========================= //
 
+// Takes a keypress event.
+// Returns true if the key pressed is a digit, a space or a backspace.
+function key_pressed_is_digit(e){
+    var charval= String.fromCharCode(e.keyCode);
+    // Backspace KB code is 8
+    // Space KB code is 32
+    if(isNaN(charval) && e.which > 46){
+        e.preventDefault();
+    }
+    return true;
+}
+
 // Takes a string (either 'notes' or 'rhythms').
 // Updates hidden textareas of the chosen input and its corresponding canvas.
 // Also updates the generated loop.
@@ -28,23 +40,29 @@ function updateFields(currentField) {
 // and the id string of the output textarea (ex.: 'xp_out').
 // Updates the generated loop string and its corresponding canvas.
 function updateXP(notes_str, rhythms_str, title, bpm, out_id) {
-	// Make array of notes out of input
-	notes_str = clean_input_str(notes_str);
-	var notes_a = notes_str.split(/[ ]+/);
+	// Avoid processing empty strings
+	if (notes_str === '' || notes_str === undefined || notes_str.match(/^[ ]+$/) ||
+		rhythms_str === '' || rhythms_str === undefined || rhythms_str.match(/^[ ]+$/)) {
+		xp_abc = '';
+	} else {
+		// Make array of notes out of input
+		notes_str = clean_input_str(notes_str);
+		var notes_a = notes_str.split(/[ ]+/);
 
-	// Make array of rhythms out of input
-	rhythms_str = clean_input_str(rhythms_str);
-	var rhythms_a = rhythms_str.split(/[\D]+/);
+		// Make array of rhythms out of input
+		rhythms_str = clean_input_str(rhythms_str);
+		var rhythms_a = rhythms_str.split(/[\D]+/);
 
-	// Generate the loop
-	var xp_abc = make_xp_abc(notes_a, rhythms_a);
-	var ts = r_to_ts(rhythms_a);
-	
-	// Format the loop
-	var bars_to_break = 4;
-	if (ts[0] >= 13) bars_to_break = 2;
-	xp_abc = format_abc_str(xp_abc, ts, bars_to_break);
-	xp_abc = add_intro_to_abc_str(title, bpm, xp_abc, ts);
+		// Generate the loop
+		var xp_abc = make_xp_abc(notes_a, rhythms_a);
+		var ts = r_to_ts(rhythms_a);
+		
+		// Format the loop
+		var bars_to_break = 4;
+		if (ts[0] >= 13) bars_to_break = 2;
+		xp_abc = format_abc_str(xp_abc, ts, bars_to_break);
+		xp_abc = add_intro_to_abc_str(title, bpm, xp_abc, ts);
+	};
 
 	// Update loop textarea
 	var xp_textarea = $('#' + out_id);
@@ -58,13 +76,18 @@ function updateXP(notes_str, rhythms_str, title, bpm, out_id) {
 // (ex.: 'notes_output') that will be read by abcjs to generate the canvas.
 // Updates the hidden notes input textarea and its corresponding canvas.
 function updateNotes(notes_str, out_id) {
-	// Add line breaks every 4 notes
-	notes_str = clean_input_str(notes_str);
-	notes_str = line_break_every_n_notes(notes_str, 4);
-	
-	// Add intro info to the string
-	// (makes notes appear as halves)
-	notes_str = "L: 1/2\n" + notes_str;
+	// Avoid processing an empty string
+	if (notes_str === '' || notes_str === undefined || notes_str.match(/^[ ]+$/)) {
+		notes_str = '';
+	} else {
+		// Add line breaks every 4 notes
+		notes_str = clean_input_str(notes_str);
+		notes_str = line_break_every_n_notes(notes_str, 4);
+		
+		// Add intro info to the string
+		// (makes notes appear as halves)
+		notes_str = "L: 1/2\n" + notes_str;
+	};
 
 	// Update hidden notes textarea
 	$('#' + out_id).val(notes_str);
@@ -77,15 +100,21 @@ function updateNotes(notes_str, out_id) {
 // (ex.: 'rhythmss_output') that will be read by abcjs to generate the canvas.
 // Updates the hidden rhythm input textarea and its corresponding canvas.
 function updateRhythms(rhythms_str, out_id) {
-	// Make array of rhythms out of input
-	rhythms_str = clean_input_str(rhythms_str);
-	var rhythms_a = rhythms_str.split(' ');
-	rhythms_a = remove_wrong_rhythms(rhythms_a);
-	rhythms_str = rhythms_a.join(' ');
+	var abc_str = '';
+	// Avoid processing an empty string
+	if (rhythms_str === '' || rhythms_str === undefined || rhythms_str.match(/^[ ]+$/)) {
+		abc_str = ' ';
+	} else {
+		// Make array of rhythms out of input
+		rhythms_str = clean_input_str(rhythms_str);
+		var rhythms_a = rhythms_str.split(' ');
+		rhythms_a = remove_wrong_rhythms(rhythms_a);
+		rhythms_str = rhythms_a.join(' ');
 
-	// Generate the abc string
-	var ts = r_to_ts(rhythms_a);
-	var abc_str = input_r_to_abc_str(rhythms_str, ts, 4);
+		// Generate the abc string
+		var ts = r_to_ts(rhythms_a);
+		var abc_str = input_r_to_abc_str(rhythms_str, ts, 4);
+	};
 
 	// Update hidden rhythms textarea
 	$('#' + out_id).val(abc_str);
