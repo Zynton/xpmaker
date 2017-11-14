@@ -104,14 +104,21 @@ function remove_wrong_rhythms(r_arr) {
 	var l = r_arr.length;
 	for (var i = 0; i < l; i++) {
 		var r_int = parseInt(r_arr[i]);
-		// If the rhythm is not a number or if it's not a power of 2, remove it.
-		if (r_int === undefined || Math.log2(r_int) % 1 != 0) {
+		// If the rhythm is not a number, remove it.
+		if (r_int === undefined) {
 			r_arr.splice(i, 1);
 			i -= 1; // The next index on the array is now i.
 			l = r_arr.length;
 		};
 	};
 	return r_arr;
+};
+
+// Takes a number (decimal or integer).
+// Returns true if it's a power of 2.
+// Returns false if it's not a power of 2.
+function is_power_of_two(n) {
+	return Math.log2(n) % 1 == 0 ? true: false;
 };
 
 // TIME SIGNATURE CALCULATIONS //
@@ -148,30 +155,46 @@ function r_to_length(rhythm, ts_den) {
     return length;
 };
 
-// Takes a single rhythm string (ex.: '4.') and the denominator of a time signature.
-// Returns the length in beats (ex.: 1.5).
+// Takes a single rhythm string (ex.: '4') and the denominator of a time signature.
+// Returns the length in beats (ex.: 1).
 function r_str_to_length(rhythm_str, ts_den) {
 	tuplet_re = /.*:(\d+)$/;
 
-	if (rhythm_str == '3') rhythm_str = '4.';
-	if (rhythm_str == '6' || rhythm_str == '7') rhythm_str = '8.';
-	if (rhythm_str == '11') rhythm_str = '16.';
-	
-	if (rhythm_str[rhythm_str.length - 1] == '.') {
-		var rhythm_value = parseInt(rhythm_str);
+	// Test if dotted note
+	// If so, rhythm_value is the nearest higher integer
+	// that is a power of two and the length is
+	// that times 2/3.
+	var rhythm_value = parseInt(rhythm_str);
+	if (is_power_of_two(rhythm_value) == false) {
+		while (is_power_of_two(rhythm_value) == false) {
+			rhythm_value += 1;
+		};
 		var rhythm_float = rhythm_value * 2/3;
 	} else {
-		rhythm_float = parseFloat(rhythm_str);
+		var rhythm_float = parseFloat(rhythm_str);
 	};
 	
 	var length_in_beats = ts_den / rhythm_float;
 	return length_in_beats;
 };
 
-// Takes a length in beats (ex.: 1.5) and the denominator of a time signature.
-// Returns a single rhythm string (ex.: '4.').
+// Takes a length in beats (ex.: 1) and the denominator of a time signature.
+// Returns a single rhythm string (ex.: '4').
 function length_to_r_str(length, ts_den) {
 	var rhythm_float = ts_den / length;
+
+	// Test if dotted note
+	// If so, length is the nearest lower
+	// integer that isn't a power of two
+	if (is_power_of_two(length) == false) {
+		length = length * 2/3;
+		rhythm_float = ts_den / length;
+		rhythm_float = parseInt(rhythm_float);
+		while (is_power_of_two(rhythm_float) && rhythm_float > 0) {
+			rhythm_float -= 1;
+		};
+	};
+
 	var rhythm_str = '' + rhythm_float;
 
 	return rhythm_str;
@@ -251,6 +274,7 @@ function format_abc_str(n_str, ts, n_bars_break) {
 		return '';
 	};
 	var matrix = abc_str_to_matrix(n_str, ts);
+	console.log('n_str: ' + n_str);
 	var abc_str = add_ties(n_str, matrix);
 	abc_str = add_barlines(abc_str, ts);
 	abc_str = line_break_every_n_barlines(abc_str, n_bars_break);
@@ -265,7 +289,7 @@ function add_ties(n_str, matrix) {
 	var current_length = 0;
 	var ts = matrix[2];
 	var bar_length = ts[0] * (4 / ts[1]);
-	for (var i = 0; i < matrix[0].length; i++) {
+	for (var i = 0; i < matrix[1].length; i++) {
 		n_str = n_str.replace(/[ ]+/g, ' '); // clean up: no multiple spaces
 		var note_name = matrix[0][i];
 		var rhythm_str = matrix[1][i];
@@ -327,6 +351,8 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 	if (current_length + note_length <= available_time || note_length == 0) {
 		str_sofar = str_sofar.replace(/^(-)/, '');
 		var replacement_str = str_sofar + '-' + str_to_transform;
+		console.log('replacement_str: ' + replacement_str);
+		console.log('---');
 		return replacement_str.replace(/-/g, '- ');
 	} else { // Recursive case:
 		// Get note name
@@ -343,6 +369,10 @@ function make_replacement_str(str_sofar, str_to_transform, current_length, note_
 		// Create the string that should replace the original note in the abc_str
 		str_sofar += '-' + note_name + '/' + first_note_r_str;
 		str_to_transform = note_name + '/' + second_note_r_str;
+		console.log('str_sofar: ' + str_sofar);
+		console.log('str_to_transform: ' + str_to_transform);
+		console.log('first_note_length: ' + first_note_length);
+		console.log('second_note_length: ' + second_note_length);
 
 		// Reset stuff
 		current_length = 0;
