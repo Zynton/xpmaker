@@ -18,6 +18,12 @@
   		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   	</head>
   	<body class="indigo lighten-4">
+  		<!-- Mailchimp popup form -->
+		<script type="text/javascript" src="//downloads.mailchimp.com/js/signup-forms/popup/embed.js" data-dojo-config="usePlainJson: true, isDebug: false"></script>
+		<script type="text/javascript">
+			require(["mojo/signup-forms/Loader"], function(L) { L.start({"baseUrl":"mc.us17.list-manage.com","uuid":"c1fa5f11f26c369417c698634","lid":"d8deb14351"}) })
+		</script>
+		<!-- End Mailchimp popup form-->
   		<header><h1 class="center-align">Weird loop Maker</h1></header>
   		<main class="container">
 
