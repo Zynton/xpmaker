@@ -1,10 +1,10 @@
 # XP-MAKER
-[_XP-MAKER_](http://www.antoineguenet.com/webdev/xpmaker/) is a weird musical loop generator. Enter a rhythm and a melody and it will create a loop for you mixing and looping the melody with that rhythm. You can listen to your loop, look at the score, and download it in midi. It was inspired by [Magic Malik](http://www.magicmalik.com/repertoire_site/)'s "XP" musical compositions.
+[_XP-MAKER_](http://developer.antoineguenet.com/xpmaker/) is a weird musical loop generator. Enter a rhythm and a melody and it will create a loop for you mixing and looping the melody with that rhythm. You can listen to your loop, look at the score, and download it in midi. It was inspired by [Magic Malik](http://www.magicmalik.com/repertoire_site/)'s "XP" musical compositions.
 
 ## Installation
 * Clone this repository : `git clone https://github.com/Zinston/xpmaker.git`
 * Install all required Python packages with [pip](https://pypi.python.org/pypi/pip) : `pip install -r requirements.txt`
-* Run `manage.py` : `python manage.py`
+* Run `manage.py` : `python run.py`
 * The app is running on 0.0.0.0:5000
 
 ## Usage
@@ -34,8 +34,6 @@
 * Adds beams between notes automatically
 
 ## Notes
-* The python version (`xpmaker.py`) is an earlier version to be used with the command line. No notation features with that version.
-* The `manage.py` file is not actually necessary as the current version of _XP-MAKER_ works with HTML and Javascript alone.
 * _XP-MAKER_ uses _ABCJS_ for all music notation and MIDI generation.
 
 ## License
