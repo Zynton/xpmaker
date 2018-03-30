@@ -30,7 +30,7 @@
   			<ul class="collapsible" data-collapsible="expandable">
   				<li>
   					<div class="collapsible-header"><i class="material-icons">hearing</i>Resulting Loop</div>
-				    <div class="collapsible-body center-align white">
+				    <div class="collapsible-body center-align white" id="xp-collapsible">
 				  		<div id="xp_canvas" class="center-align" style="width: 100%; overflow: hidden; height: 400px;"></div>
 				  		<div id="xp_midi"></div>
 				  		<div id="xp_midi_dl"></div>
@@ -48,27 +48,6 @@
   								<h4>Notes</h4>
 		  						<form method="post" id="inputs">
 									<div>Enter your notes here without regard for rhythm.</div>
-									<script type="text/javascript">
-										window.onload = function() {
-											updateFields('notes');
-											updateFields('rhythms');
-										};
-
-										function toggle_xp_input_display() {
-											var xp_input = $('#xp_input');
-											xp_input.toggle();
-											xp_input.focus();
-										};
-
-										/*window.onresize = function(event) {
-											do_resize();
-										};
-
-										window.onload = function() {
-											do_resize();
-										}*/
-
-									</script>
 									<div class="input-field">
 									  	<textarea name="notes" id="notes_input" cols="80" rows="5" oninput="updateFields('notes')">F _A F _d E C _A</textarea>
 									</div>
@@ -115,6 +94,6 @@
 	        	</div>
 	      	</div>
 		 </footer>
-    
+
   	</body>
 </html>

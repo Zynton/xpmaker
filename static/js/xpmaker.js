@@ -5,6 +5,22 @@
 
 (function() {
 
+	$(document).ready(function() {
+		init();
+	});
+
+
+	function init() {
+		updateFields('notes');
+		updateFields('rhythms');
+
+		$(window).resize(function() {
+			updateFields('notes');
+			updateFields('rhythms');
+		});
+	};
+
+
 	// USER INPUT TRANSFORMATION //
 	// ========================= //
 
@@ -14,7 +30,7 @@
 	* @param {Object} e - A keypress event.
 	* @returns {boolean} True if the key pressed is a digit, a space or a backspace.
 	*/
-	function key_pressed_is_digit(e){
+	function key_pressed_is_digit(e) {
 		var charval = String.fromCharCode(e.keyCode);
 		// Backspace KB code is 8
 		// Space KB code is 32
@@ -35,13 +51,14 @@
 		var rhythms_str = $('#rhythms_input').val();
 		var title = $('#title_input').val();
 		var bpm = $('#bpm_input').val();
-		updateXP(notes_str, rhythms_str, title, bpm, "xp_input");
 
 		if (currentField == "notes") {
 			updateNotes(notes_str, 'notes_translated');
 		} else if (currentField == "rhythms") {
 			updateRhythms(rhythms_str, 'rhythms_translated');
 		};
+
+		updateXP(notes_str, rhythms_str, title, bpm, "xp_input");
 	};
 
 
@@ -83,7 +100,7 @@
 		xp_textarea.val(xp_abc);
 
 		// Update loop canvas
-		var xp_editor = update_editor(out_id, "xp_canvas", "xp_midi", "xp_midi_dl", 650);
+		var xp_editor = update_editor(out_id, "xp_canvas", "xp_midi", "xp_midi_dl", $(window).width());
 	};
 
 
@@ -952,23 +969,27 @@
 	/**
 	* @description Create render options for the canvas.
 	* @param {string} canvas_id - The id of the canvas.
-	* @param {number} width - The width of the canvas.
+	* @param {number} window_width - The width of the window.
 	* @returns {Object} The render_options for the canvas to scale.
 	*/
-	function get_canvas_renderoptions(canvas_id, width) {
-		var w = $('.collapsible').width();
-		var e = sw/4;
-		var sw = width;
+	function get_canvas_renderoptions(canvas_id, window_width) {
+		var factor = window_width > 600 ? (window_width > 993 ? .7 : .85) : .9; // dependent on css rules... (no good!)
+
+		var staff_width = (window_width * factor) - 80; // TODO: remove dependence on view
+		var bar_width = staff_width / 4;
 		var scale = 1.0;
 
-		var arealeft = w - e;
-		if (arealeft < (sw + (sw/3))) {
-			scale = scale * (arealeft - 50)/ sw;
-			sw = arealeft - 50;
-		};
+		var area_left = staff_width - bar_width;
+		scale = scale * area_left / staff_width;
 
-		$('#paperid').width = sw;
-		return {staffwidth: sw, scale: scale};
+		return {staffwidth: staff_width, scale: scale};
+	};
+
+
+	function toggle_xp_input_display() {
+		var xp_input = $('#xp_input');
+		xp_input.toggle();
+		xp_input.focus();
 	};
 
 })();
