@@ -1,8 +1,40 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: xpmaker.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: xpmaker.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
 * @todo Add support for tuplets.
 * @todo Add support for b and # and 4. instead of _ and ^ and 3 on user input.
 */
 
+/**
+ * My namespace.
+ * @namespace xpMaker
+ */
 (function() {
 
 	// USER INPUT TRANSFORMATION //
@@ -18,7 +50,7 @@
 		var charval = String.fromCharCode(e.keyCode);
 		// Backspace KB code is 8
 		// Space KB code is 32
-		if (isNaN(charval) && e.which > 46) {
+		if (isNaN(charval) &amp;&amp; e.which > 46) {
 			e.preventDefault();
 		};
 		return true;
@@ -155,7 +187,7 @@
 	*/
 	function remove_wrong_rhythms(r_arr) {
 		var l = r_arr.length;
-		for (var i = 0; i < l; i++) {
+		for (var i = 0; i &lt; l; i++) {
 			// If the rhythm is not made of digits, remove it.
 			if (r_arr[i].match(/\d/)) {
 			} else {
@@ -202,7 +234,7 @@
 	*/
 	function r_arr_to_length(rhythms_array) {
 		var length = 0;
-		for (var i = 0; i < rhythms_array.length; i++) {
+		for (var i = 0; i &lt; rhythms_array.length; i++) {
 			r = rhythms_array[i];
 			length += r_str_to_length(r, 4);
 		};
@@ -274,7 +306,7 @@
 			length = length * 2/3;
 			rhythm_float = ts_den / length;
 			rhythm_float = parseInt(rhythm_float);
-			while (is_power_of_two(rhythm_float) && rhythm_float > 0) {
+			while (is_power_of_two(rhythm_float) &amp;&amp; rhythm_float > 0) {
 				rhythm_float -= 1;
 			};
 		};
@@ -314,7 +346,7 @@
 	*/
 	function divide_ts(ts) {
 		var feel = 4
-		if (ts[0] % 4 != 0 && ts[0] % 3 != 0 || ts[0] == ts[1]) {
+		if (ts[0] % 4 != 0 &amp;&amp; ts[0] % 3 != 0 || ts[0] == ts[1]) {
 			return ts;
 		} else if (ts[0] % 3 == 0) {
 			feel = 3;
@@ -325,9 +357,9 @@
 		var num = ts[0] / (ts[0] / feel);
 
 		// Avoid 3/8, 2/8, 1/8:
-		if (num <= 3 && ts[1] == 8) {
+		if (num &lt;= 3 &amp;&amp; ts[1] == 8) {
 			// Avoid weird stuff with the 3/8 and 2/8 escaping below, in case the origin is 3/8 already.
-			if (ts[0] <= 3 && ts[1] == 8) { // TODO: replace with if (ts[0] == num) ?
+			if (ts[0] &lt;= 3 &amp;&amp; ts[1] == 8) { // TODO: replace with if (ts[0] == num) ?
 				return ts;
 			};
 			// Whatever we divided our original num by to get 3 or 2
@@ -353,7 +385,7 @@
 	*/
 	function input_r_to_abc_str(input_r, ts, n_bars_break) {
 		var n_str = input_r_to_n_str(input_r);
-		abc_str = format_abc_str(n_str, ts, n_bars_break); // Take care of beams, barlines & line breaks
+		abc_str = format_abc_str(n_str, ts, n_bars_break); // Take care of beams, barlines &amp; line breaks
 		abc_str = "L: 1\nK: perc stafflines=1\nM:" + ts[0] + '/' + ts[1] + '\n' + abc_str;
 		return abc_str;
 	};
@@ -395,7 +427,7 @@
 		var ts = matrix[2];
 		var bar_length = ts[0] * (4 / ts[1]);
 
-		for (var i = 0; i < matrix[1].length; i++) {
+		for (var i = 0; i &lt; matrix[1].length; i++) {
 			n_str = n_str.replace(/[ ]+/g, ' '); // clean up: no multiple spaces
 			var note_name = matrix[0][i];
 			var rhythm_str = matrix[1][i];
@@ -423,7 +455,7 @@
 
 			// If the note is on the first beat and it's not longer
 			// than the bar, then let it be.
-			if (note_length > 1 && matrix[4][i] == 1) {
+			if (note_length > 1 &amp;&amp; matrix[4][i] == 1) {
 				if (bar_length >= note_length) {
 					available_time = note_length;
 				} else { // if it IS longer than the bar, limit to the closest lower pair number
@@ -467,7 +499,7 @@
 	*/
 	function make_replacement_str(str_sofar, str_to_transform, current_length, note_length, available_time) {
 		// Base case:
-		if (current_length + note_length <= available_time || note_length == 0) {
+		if (current_length + note_length &lt;= available_time || note_length == 0) {
 			str_sofar = str_sofar.replace(/^(-)/, '');
 			var replacement_str = str_sofar + '-' + str_to_transform;
 			return replacement_str.replace(/-/g, '- ');
@@ -517,11 +549,11 @@
 	*/
 	function add_intro_to_abc_str(title, bpm, xp_abc, ts) {
 		var abc_intro = "";
-		if (title !== undefined && title !== "") {
+		if (title !== undefined &amp;&amp; title !== "") {
 			abc_intro += "T: " + title + "\n";
 		};
 		abc_intro += "L: 1\n";
-		if (bpm !== undefined && bpm !== "") {
+		if (bpm !== undefined &amp;&amp; bpm !== "") {
 			abc_intro += "Q: 1/4=" + bpm + "\n";
 		};
 		abc_intro += "M: " + ts[0] + "/" + ts[1] + "\n";
@@ -612,7 +644,7 @@
 			notes_i = (notes_i + 1) % notes_a.length;
 			rhythms_i = (rhythms_i + 1) % rhythms_a.length;
 			note = [notes_a[notes_i], rhythms_a[rhythms_i]];
-			if (notes_i == 0 && rhythms_i == 0) {
+			if (notes_i == 0 &amp;&amp; rhythms_i == 0) {
 				break;
 			};
 			xp.push(note);
@@ -628,7 +660,7 @@
 	*/
 	function xp_to_abc(xp) {
 		var abc_str = "";
-		for (var i = 0; i < xp.length; i++) {
+		for (var i = 0; i &lt; xp.length; i++) {
 			evt = xp[i];
 			note_rhythm = note_rhythm_to_abc(evt[0], evt[1]);
 
@@ -654,7 +686,7 @@
 	*/
 	function line_break_every_n_bars(abc_str, matrix, n) {
 		var indexes = get_each_nth_bars(n, matrix);
-		for (var i = 0; i < indexes.length; i++) {
+		for (var i = 0; i &lt; indexes.length; i++) {
 			var position = getPosition(abc_str, ' ', indexes[i]);
 			abc_str = abc_str.substr(0, position) + ' \n' + abc_str.substr(position + 1, abc_str.length);
 		};
@@ -669,7 +701,7 @@
 	* @returns {string} An updated abc-formatted string with line breaks.
 	*/
 	function line_break_every_n_barlines(abc_str, n) {
-		for (var i = n; i < abc_str.replace(/[^|]/g, '').length; i += n) {
+		for (var i = n; i &lt; abc_str.replace(/[^|]/g, '').length; i += n) {
 			var position = getPosition(abc_str, '|', i);
 			abc_str = abc_str.substr(0, position + 1) + ' \n' + abc_str.substr(position + 2, abc_str.length);
 		};
@@ -689,7 +721,7 @@
 		if (notes_a.length >= n) {
 			var new_str = notes_str;
 
-			for (var i = n; i < notes_a.length; i += n) {
+			for (var i = n; i &lt; notes_a.length; i += n) {
 				var position = getPosition(notes_str, ' ', i);
 				new_str = new_str.substr(0, position) + '`' + new_str.substr(position + 1, new_str.length);
 			};
@@ -710,7 +742,7 @@
 	function add_barlines(abc_str, ts) {
 		var rhythms = rhythm_from_abc(abc_str); // make list of rhythms out of the string
 		current_bar = 0;
-		for (var i = 0; i < rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
+		for (var i = 0; i &lt; rhythms.length - 1; i++) { // - 1 to avoid getting a bar line at the end
 			var safe_str = escape_spaces(abc_str);
 			current_bar += r_to_length(rhythms[i], ts[1]); // convert rhythm to make sense with ts den
 			if (current_bar >= ts[0]) {
@@ -734,7 +766,7 @@
 		var safe_str = abc_str.replace(/[ ]+/g, '`');
 
 		current_beat = 0;
-		for (var i = 0; i < rhythms.length; i++) {
+		for (var i = 0; i &lt; rhythms.length; i++) {
 			r_length = r_to_length(rhythms[i]); // convert rhythm to make sense with ts den
 			// if the beat isn't complete, tie the beams (beat is complete when number is an integer)
 			if (current_beat % 1 != 0) {
@@ -767,8 +799,8 @@
 	*/
 	function get_each_nth_bars(n, matrix) {
 		var indexes = [];
-		for (var i = 0; i < matrix[0].length; i++) {
-			if (matrix[3][i] % (n+1) == 0 && matrix[4][i] == 1) {
+		for (var i = 0; i &lt; matrix[0].length; i++) {
+			if (matrix[3][i] % (n+1) == 0 &amp;&amp; matrix[4][i] == 1) {
 				indexes.push(i);
 			};
 		};
@@ -784,7 +816,7 @@
 	*/
 	function get_last_of_bar(matrix) {
 		var indexes = [];
-		for (var i = 0; i < matrix[0].length; i++) {
+		for (var i = 0; i &lt; matrix[0].length; i++) {
 			// if we're on the first beat, take the note just before's index
 			// (unless it's the very first beat of the melody).
 			if (matrix[4][i] == 1) {
@@ -820,7 +852,7 @@
 		var length = 0;
 		var bar_nr = 1;
 		var beat_nr = 0;
-		for (var i = 0; i < rhythms.length; i++) {
+		for (var i = 0; i &lt; rhythms.length; i++) {
 			beat_nrs.push(beat_nr + 1);
 			bar_nrs.push(bar_nr);
 			beat_nr += r_to_length(rhythms[i], ts[1]);
@@ -859,7 +891,7 @@
 
 		var length = 0;
 		var bar_nr = 0;
-		for (var i = 0; i < index; i++) {
+		for (var i = 0; i &lt; index; i++) {
 			length += r_to_length(rhythms[i], ts[1]);
 			if (length >= ts[0]) {
 				length -= ts[0];
@@ -962,7 +994,7 @@
 		var scale = 1.0;
 
 		var arealeft = w - e;
-		if (arealeft < (sw + (sw/3))) {
+		if (arealeft &lt; (sw + (sw/3))) {
 			scale = scale * (arealeft - 50)/ sw;
 			sw = arealeft - 50;
 		};
@@ -972,3 +1004,26 @@
 	};
 
 })();
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="xpMaker.html">xpMaker</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 30 2018 04:49:42 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
