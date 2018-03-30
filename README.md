@@ -4,6 +4,7 @@
 ## Installation
 * Clone this repository : `git clone https://github.com/Zinston/xpmaker.git`
 * Install all required Python packages with [pip](https://pypi.python.org/pypi/pip) : `pip install -r requirements.txt`
+* Install all bower dependencies from `bower.json` : `bower install`
 * Run `manage.py` : `python run.py`
 * The app is running on 0.0.0.0:5000
 
